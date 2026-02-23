@@ -1,3 +1,21 @@
+function analyzeSVO($text) {
+    $apiKey = "YOUR_OPENAI_API_KEY";
+
+    $client = OpenAI::client($apiKey);
+
+    $response = $client->chat()->create([
+        'model' => 'gpt-3.5-turbo',
+        'messages' => [
+            ['role' => 'system', 'content' => 'Extract Subject, Verb, Object (SVO) structure from requirement. Return in short format.'],
+            ['role' => 'user', 'content' => $text]
+        ],
+    ]);
+
+    return $response['choices'][0]['message']['content'] ?? 'No analysis';
+}
+
+
+
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -254,7 +272,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && $_FILE
                 $parts = explode('|',$d); ?>
                 <div class="card fr-type">
                     <strong><?php echo htmlspecialchars($k); ?></strong>
-                    <p><?php echo htmlspecialchars(array_shift($parts)); ?></p>
+                  <p><?php echo htmlspecialchars($item['text']); ?></p>
+
+<!-- Analyze Button -->
+<form method="post">
+    <input type="hidden" name="analyze_text" value="<?php echo htmlspecialchars($item['text']); ?>">
+    <button class="btn-primary" name="doAnalyze" style="margin-top:10px;">
+        Analyze SVO
+    </button>
+</form>
+
+<?php
+if(isset($_POST['doAnalyze']) && $_POST['analyze_text'] === $item['text']) {
+    $analysis = analyzeSVO($item['text']);
+    echo "<div style='margin-top:10px; padding:10px; background:#f1f5f9; border-radius:8px;'>
+            <strong>SVO Analysis:</strong><br>" . htmlspecialchars($analysis) . "
+          </div>";
+}
+?>
                     <?php foreach($parts as $sub): ?>
                         <div class="sub-requirement"><?php echo htmlspecialchars($sub); ?></div>
                     <?php endforeach; ?>
