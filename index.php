@@ -1,6 +1,4 @@
 
-
-
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -83,7 +81,10 @@ function parseTextSRS($text) {
 }
 
 // 3. PROCESS FILE UPLOAD
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && !isset($_POST['doAnalyze'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' 
+    && isset($_FILES['srsFile']) 
+    && !isset($_POST['doAnalyze'])) {
+
     $file = $_FILES['srsFile']['tmp_name'];
     $ext = strtolower(pathinfo($_FILES['srsFile']['name'], PATHINFO_EXTENSION));
     $text = '';
@@ -241,12 +242,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && !isset
                 <p><?php echo htmlspecialchars($item['text']); ?></p>
 
                 <!-- SVO Analyze Button -->
-                <form method="post">
-                    <input type="hidden" name="analyze_text" value="<?php echo htmlspecialchars($item['text']); ?>">
-                    <button class="btn-primary" name="doAnalyze" style="margin-top:10px;">
-                        Analyze SVO
-                    </button>
-                </form>
+              <button class="analyze-btn" data-text="<?php echo htmlspecialchars($item['text']); ?>">
+    Analyze SVO
+</button>
+<div class="svo-result"></div>
 
                 <?php
                 if (isset($_POST['doAnalyze']) && $_POST['analyze_text'] === $item['text']) {
