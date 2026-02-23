@@ -83,7 +83,7 @@ function parseTextSRS($text) {
 }
 
 // 3. PROCESS FILE UPLOAD
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && $_FILES['srsFile']['error'] == 0) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && !isset($_POST['doAnalyze'])) {
     $file = $_FILES['srsFile']['tmp_name'];
     $ext = strtolower(pathinfo($_FILES['srsFile']['name'], PATHINFO_EXTENSION));
     $text = '';
@@ -257,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && $_FILE
                 }
                 ?>
             </div>   
-            
+
                 <?php elseif($item['type']=='fr-sub'): ?>
                     <div class="sub-requirement"><i class="fas fa-arrow-right-long"></i> <?php echo htmlspecialchars($item['text']); ?></div>
                 <?php elseif($item['type']=='nfr'): ?>
@@ -280,12 +280,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && $_FILE
                   <p><?php echo htmlspecialchars($item['text']); ?></p>
 
 <!-- Analyze Button -->
-<form method="post">
-    <input type="hidden" name="analyze_text" value="<?php echo htmlspecialchars($item['text']); ?>">
-    <button class="btn-primary" name="doAnalyze" style="margin-top:10px;">
-        Analyze SVO
-    </button>
-</form>
+<button class="btn-primary analyze-btn" data-text="<?php echo htmlspecialchars($item['text']); ?>" style="margin-top:10px;">
+    Analyze SVO
+</button>
+<div class="svo-result"></div>
 
 <?php
 if(isset($_POST['doAnalyze']) && $_POST['analyze_text'] === $item['text']) {
@@ -318,6 +316,7 @@ if(isset($_POST['doAnalyze']) && $_POST['analyze_text'] === $item['text']) {
     <?php
     $allRequirements = [];
 
+
     foreach($parsed['FR'] as $req){
         $parts = explode('|',$req);
         foreach($parts as $p){
@@ -330,13 +329,31 @@ if(isset($_POST['doAnalyze']) && $_POST['analyze_text'] === $item['text']) {
     }
     ?>
 
+    // ANALYZE EACH REQUIREMENT WITH OPENAI SVO
+$analysisMap = [];
+
+if (!empty($allRequirements)) {
+    foreach ($allRequirements as $req) {
+        $analysisMap[$req] = analyzeSVO($req);
+    }
+}
+
     <?php if(empty($allRequirements)): ?>
         <p>No requirements found.</p>
     <?php else: ?>
         <ul style="line-height:1.8;">
             <?php foreach($allRequirements as $r): ?>
-                <li><?php echo htmlspecialchars($r); ?></li>
-            <?php endforeach; ?>
+<li>
+    <?php echo htmlspecialchars($r); ?>
+
+    <?php if (!empty($analysisMap[$r])): ?>
+        <div style="margin-top:8px; padding:10px; background:#f1f5f9; border-radius:8px;">
+            <strong>SVO Analysis:</strong><br>
+            <?php echo htmlspecialchars($analysisMap[$r]); ?>
+        </div>
+    <?php endif; ?>
+</li>       
+     <?php endforeach; ?>
         </ul>
 
         <!-- Download PDF Button -->
@@ -359,6 +376,7 @@ function updateFileName() {
     }
 }
 
+// NAVIGATION VIEW SWITCH
 document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -366,6 +384,29 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         const view = this.dataset.view;
         document.querySelectorAll('.view-section').forEach(section => {
             section.style.display = (section.id === view) ? 'block' : 'none';
+        });
+    });
+});
+
+// SVO ANALYSIS AJAX
+document.querySelectorAll('.analyze-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const text = this.getAttribute('data-text');
+        const resultBox = this.nextElementSibling;
+
+        resultBox.innerHTML = "Analyzing...";
+
+        fetch('analyze.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'text=' + encodeURIComponent(text)
+        })
+        .then(response => response.text())
+        .then(data => {
+            resultBox.innerHTML = "<strong>SVO:</strong><br>" + data;
+        })
+        .catch(() => {
+            resultBox.innerHTML = "Error analyzing.";
         });
     });
 });
