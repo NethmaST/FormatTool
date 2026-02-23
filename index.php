@@ -198,6 +198,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && $_FILE
         <button class="nav-btn active" data-view="full"><i class="fas fa-layer-group"></i> Full Document</button>
         <button class="nav-btn" data-view="fr"><i class="fas fa-code"></i> Functional (FR)</button>
         <button class="nav-btn" data-view="nfr"><i class="fas fa-shield-halved"></i> Non-Functional (NFR)</button>
+        <button class="nav-btn" data-view="clean">
+    <i class="fas fa-list"></i> Clean Requirements
+</button>
         <div style="margin-top: auto;">
             <a href="?" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem;"><i class="fas fa-arrow-left"></i> Upload New File</a>
         </div>
@@ -266,10 +269,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && $_FILE
                     <strong><?php echo htmlspecialchars($k); ?></strong>
                     <p><?php echo htmlspecialchars($d); ?></p>
                 </div>
-            <?php endforeach; ?>
+            <?php endforeach; ?> 
         </div>
+
+        <div id="clean" class="view-section" style="display:none;">
+    <h2>Clean Requirements (Point-wise)</h2>
+
+    <?php
+    $allRequirements = [];
+
+    foreach($parsed['FR'] as $req){
+        $parts = explode('|',$req);
+        foreach($parts as $p){
+            $allRequirements[] = trim($p);
+        }
+    }
+
+    foreach($parsed['NFR'] as $req){
+        $allRequirements[] = trim($req);
+    }
+    ?>
+
+    <?php if(empty($allRequirements)): ?>
+        <p>No requirements found.</p>
+    <?php else: ?>
+        <ul style="line-height:1.8;">
+            <?php foreach($allRequirements as $r): ?>
+                <li><?php echo htmlspecialchars($r); ?></li>
+            <?php endforeach; ?>
+        </ul>
     <?php endif; ?>
-</div>
+</div> 
+
+    <?php endif; ?>
 
 <script>
 function updateFileName() {
