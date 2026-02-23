@@ -15,5 +15,8 @@
             "name": "nethuT2001",
             "email": "162661901+nethuT2001@users.noreply.github.com"
         }
-    ]
+    ],
+    "require": {
+        "setasign/fpdf": "^1.8"
+    }
 }

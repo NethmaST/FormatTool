@@ -17,8 +17,6 @@ if (PHP_VERSION_ID < 50600) {
     throw new RuntimeException($err);
 }
 
-// 1. Ensure this path is correct relative to this file
 require_once __DIR__ . '/composer/autoload_real.php';
 
-// 2. The ID below MUST match the class name inside vendor/composer/autoload_real.php
 return ComposerAutoloaderInit42565fd0f3b40496cf457d6c7fe5594e::getLoader();
