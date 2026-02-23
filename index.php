@@ -1,3 +1,57 @@
+function analyzeSVO($requirements)
+{
+    $apiKey = $_ENV['GEMINI_API_KEY'] ?? null;
+
+    if (!$apiKey || empty($requirements)) {
+        return [];
+    }
+
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+
+    $prompt = "Analyze requirements and return JSON with Subject, Verb, Object:\n\n";
+
+    foreach ($requirements as $req) {
+        $prompt .= "- " . $req . "\n";
+    }
+
+    $prompt .= "\nReturn JSON:\n{
+  \"results\": [
+    {\"requirement\": \"...\", \"subject\": \"...\", \"verb\": \"...\", \"object\": \"...\"}
+  ]
+}";
+
+    $data = [
+        "contents" => [
+            [
+                "parts" => [
+                    ["text" => $prompt]
+                ]
+            ]
+        ]
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
+        CURLOPT_POSTFIELDS => json_encode($data),
+    ]);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    if (!$response) {
+        return [];
+    }
+
+    $result = json_decode($response, true);
+
+    $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+    return json_decode($text, true) ?? [];
+}
+
 
 <?php
 ini_set('display_errors', 1);
@@ -327,8 +381,12 @@ if(isset($_POST['doAnalyze']) && $_POST['analyze_text'] === $item['text']) {
         $allRequirements[] = trim($req);
     }
     ?>
+    <?php
+$analysisJson = analyzeSVO($allRequirements);
+$analysisData = json_decode($analysisJson, true);
+?>
 
-    // ANALYZE EACH REQUIREMENT WITH OPENAI SVO
+<?php
 $analysisMap = [];
 
 if (!empty($allRequirements)) {
@@ -336,24 +394,22 @@ if (!empty($allRequirements)) {
         $analysisMap[$req] = analyzeSVO($req);
     }
 }
+?>
 
-    <?php if(empty($allRequirements)): ?>
-        <p>No requirements found.</p>
-    <?php else: ?>
-        <ul style="line-height:1.8;">
-            <?php foreach($allRequirements as $r): ?>
-<li>
-    <?php echo htmlspecialchars($r); ?>
-
-    <?php if (!empty($analysisMap[$r])): ?>
-        <div style="margin-top:8px; padding:10px; background:#f1f5f9; border-radius:8px;">
-            <strong>SVO Analysis:</strong><br>
-            <?php echo htmlspecialchars($analysisMap[$r]); ?>
-        </div>
-    <?php endif; ?>
-</li>       
-     <?php endforeach; ?>
-        </ul>
+    <?php if (!empty($analysisData['results'])): ?>
+<ul style="line-height:1.8;">
+    <?php foreach ($analysisData['results'] as $row): ?>
+    <li>
+        <strong>Requirement:</strong> <?php echo htmlspecialchars($row['requirement']); ?><br>
+        <strong>S:</strong> <?php echo htmlspecialchars($row['subject']); ?><br>
+        <strong>V:</strong> <?php echo htmlspecialchars($row['verb']); ?><br>
+        <strong>O:</strong> <?php echo htmlspecialchars($row['object']); ?>
+    </li>
+    <?php endforeach; ?>
+</ul>
+<?php else: ?>
+<p>No analysis data returned.</p>
+<?php endif; ?>
 
         <!-- Download PDF Button -->
         <form method="post" action="download.php">
@@ -365,7 +421,8 @@ if (!empty($allRequirements)) {
     <?php endif; ?>
 </div>
 
-    <?php endif; ?>
+  
+    ?>
 
 <script>
 function updateFileName() {
