@@ -1,0 +1,19 @@
+{
+    "name": "nethmatissera/myphp",
+    "description": "IEEE SRS Template Viewer",
+    "require-dev": {
+        "smalot/pdfparser": "^2.12",
+        "phpoffice/phpword": "^1.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nethmatissera\\Myphp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "nethuT2001",
+            "email": "162661901+nethuT2001@users.noreply.github.com"
+        }
+    ]
+}
