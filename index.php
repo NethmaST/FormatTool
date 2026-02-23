@@ -1,18 +1,3 @@
-function analyzeSVO($text) {
-    $apiKey = "YOUR_OPENAI_API_KEY";
-
-    $client = OpenAI::client($apiKey);
-
-    $response = $client->chat()->create([
-        'model' => 'gpt-3.5-turbo',
-        'messages' => [
-            ['role' => 'system', 'content' => 'Extract Subject, Verb, Object (SVO) structure from requirement. Return in short format.'],
-            ['role' => 'user', 'content' => $text]
-        ],
-    ]);
-
-    return $response['choices'][0]['message']['content'] ?? 'No analysis';
-}
 
 
 
@@ -246,13 +231,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && $_FILE
             <p>We detected <strong><?php echo count($parsed['FR']); ?></strong> Functional and <strong><?php echo count($parsed['NFR']); ?></strong> Non-Functional requirements.</p>
         </header>
 
-        <div id="full" class="view-section">
-            <?php foreach($parsed['STRUCTURED'] as $item): ?>
-                <?php if($item['type']=='fr'): ?>
-                    <div class="card fr-type">
-                        <span class="badge badge-fr">Functional</span> <strong><?php echo htmlspecialchars($item['key']); ?></strong>
-                        <p><?php echo htmlspecialchars($item['text']); ?></p>
-                    </div>
+    <div id="full" class="view-section">
+    <?php foreach($parsed['STRUCTURED'] as $item): ?>
+        <?php if($item['type']=='fr'): ?>
+            <div class="card fr-type">
+                <span class="badge badge-fr">Functional</span>
+                <strong><?php echo htmlspecialchars($item['key']); ?></strong>
+
+                <p><?php echo htmlspecialchars($item['text']); ?></p>
+
+                <!-- SVO Analyze Button -->
+                <form method="post">
+                    <input type="hidden" name="analyze_text" value="<?php echo htmlspecialchars($item['text']); ?>">
+                    <button class="btn-primary" name="doAnalyze" style="margin-top:10px;">
+                        Analyze SVO
+                    </button>
+                </form>
+
+                <?php
+                if (isset($_POST['doAnalyze']) && $_POST['analyze_text'] === $item['text']) {
+                    $analysis = analyzeSVO($item['text']);
+                    echo "<div style='margin-top:10px; padding:10px; background:#f1f5f9; border-radius:8px;'>
+                            <strong>SVO Analysis:</strong><br>" . htmlspecialchars($analysis) . "
+                          </div>";
+                }
+                ?>
+            </div>   
+            
                 <?php elseif($item['type']=='fr-sub'): ?>
                     <div class="sub-requirement"><i class="fas fa-arrow-right-long"></i> <?php echo htmlspecialchars($item['text']); ?></div>
                 <?php elseif($item['type']=='nfr'): ?>
