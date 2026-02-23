@@ -272,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && $_FILE
             <?php endforeach; ?> 
         </div>
 
-        <div id="clean" class="view-section" style="display:none;">
+       <div id="clean" class="view-section" style="display:none;">
     <h2>Clean Requirements (Point-wise)</h2>
 
     <?php
@@ -298,8 +298,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile']) && $_FILE
                 <li><?php echo htmlspecialchars($r); ?></li>
             <?php endforeach; ?>
         </ul>
+
+        <!-- Download PDF Button -->
+        <form method="post" action="download.php">
+            <input type="hidden" name="requirements" value="<?php echo htmlspecialchars(json_encode($allRequirements)); ?>">
+            <button type="submit" class="btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-download"></i> Download PDF
+            </button>
+        </form>
     <?php endif; ?>
-</div> 
+</div>
 
     <?php endif; ?>
 
