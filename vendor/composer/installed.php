@@ -3,7 +3,7 @@
         'name' => 'nethmatissera/myphp',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '5b2a9a54b6ba6082017b6956f7db31377374d7bb',
+        'reference' => '6ac7eee00283986d04dd2468450a0c033b121207',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'nethmatissera/myphp' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '5b2a9a54b6ba6082017b6956f7db31377374d7bb',
+            'reference' => '6ac7eee00283986d04dd2468450a0c033b121207',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
