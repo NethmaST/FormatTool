@@ -878,9 +878,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
     <?php endif; ?>
 </div>
 
-  
-    ?>
-
 <script>
 /**
  * Update file input display name
@@ -927,12 +924,12 @@ if (dropZone) {
 }
 
 // SVO ANALYSIS AJAX
-document.querySelectorAll('.analyze-btn').forEach(btn => {
+document.querySelectorAll('.btn-analyze').forEach(btn => {
     btn.addEventListener('click', function () {
         const text = this.getAttribute('data-text');
         const resultBox = this.nextElementSibling;
 
-        resultBox.innerHTML = "Analyzing...";
+        resultBox.innerHTML = "🔄 Analyzing...";
 
         fetch('analyze.php', {
             method: 'POST',
@@ -941,10 +938,10 @@ document.querySelectorAll('.analyze-btn').forEach(btn => {
         })
         .then(response => response.text())
         .then(data => {
-            resultBox.innerHTML = "<strong>SVO:</strong><br>" + data;
+            resultBox.innerHTML = "<strong>SVO Analysis:</strong><br>" + data;
         })
-        .catch(() => {
-            resultBox.innerHTML = "Error analyzing.";
+        .catch((error) => {
+            resultBox.innerHTML = "❌ Error analyzing: " + error.message;
         });
     });
 });
