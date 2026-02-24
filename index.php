@@ -116,6 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         :root {
             --primary: #4f46e5;
             --primary-hover: #4338ca;
@@ -134,8 +138,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
             margin: 0; 
             display: flex;
             min-height: 100vh;
+            line-height: 1.6;
         }
 
+        /* ===== SIDEBAR ===== */
         .sidebar {
             width: 260px;
             background: var(--sidebar);
@@ -144,6 +150,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
             flex-shrink: 0;
             display: <?php echo $showViewer ? 'flex' : 'none'; ?>;
             flex-direction: column;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .sidebar h2 { font-size: 1.2rem; margin-bottom: 2rem; opacity: 0.9; display: flex; align-items: center; gap: 10px; }
@@ -163,6 +172,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
             max-width: 600px; margin: 100px auto; background: white;
             padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             text-align: center;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--primary-light);
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .upload-container h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 0.5rem 0;
+            letter-spacing: -1px;
+        }
+
+        .upload-container > p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin: 0 0 2.5rem 0;
         }
 
         .drop-zone {
@@ -193,6 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
             border-left: 2px solid #e2e8f0; font-size: 0.95rem; color: #64748b;
         }
 
+        /* ===== BUTTONS ===== */
         .btn-primary {
             background: var(--primary); color: white; padding: 12px 24px;
             border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
@@ -246,20 +282,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
 
                 <p><?php echo htmlspecialchars($item['text']); ?></p>
 
-                <!-- SVO Analyze Button -->
-              <button class="analyze-btn" data-text="<?php echo htmlspecialchars($item['text']); ?>">
-    Analyze SVO
-</button>
-<div class="svo-result"></div>
-
-                <?php
-                if (isset($_POST['doAnalyze']) && $_POST['analyze_text'] === $item['text']) {
-                    $analysis = analyzeSVO($item['text']);
-                    echo "<div style='margin-top:10px; padding:10px; background:#f1f5f9; border-radius:8px;'>
-                            <strong>SVO Analysis:</strong><br>" . htmlspecialchars($analysis) . "
-                          </div>";
-                }
-                ?>
+    
             </div>   
 
                 <?php elseif($item['type']=='fr-sub'): ?>
@@ -282,7 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
                 <div class="card fr-type">
                     <strong><?php echo htmlspecialchars($k); ?></strong>
                  <p><?php echo htmlspecialchars($d); ?></p>
-                 
+
 <!-- Analyze Button -->
 <button class="btn-primary analyze-btn" data-text="<?php echo htmlspecialchars($item['text']); ?>" style="margin-top:10px;">
     Analyze SVO
@@ -400,6 +423,28 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         });
     });
 });
+
+// DRAG AND DROP
+const dropZone = document.querySelector('.drop-zone');
+if (dropZone) {
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--primary)';
+        dropZone.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 100%)';
+    });
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = 'var(--primary-light)';
+        dropZone.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(139, 92, 246, 0) 100%)';
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('fileInput');
+        if (e.dataTransfer.files.length > 0) {
+            input.files = e.dataTransfer.files;
+            updateFileName();
+        }
+    });
+}
 
 // SVO ANALYSIS AJAX
 document.querySelectorAll('.analyze-btn').forEach(btn => {

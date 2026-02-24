@@ -1,6 +1,27 @@
 <?php
+/**
+ * SRS Intelligence Portal - Core Functions
+ * Handles PDF parsing, requirement analysis, and SVO analysis via Gemini API
+ */
+
 require_once 'vendor/autoload.php';
 
+use Dotenv\Dotenv;
+
+// Load environment variables from .env file
+try {
+    $dotenv = Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+} catch (\Exception $e) {
+    // .env file not found, use system environment
+}
+
+/**
+ * Analyze requirements using Gemini API to extract Subject-Verb-Object components
+ * 
+ * @param mixed $requirements Required text or array of requirements
+ * @return array Analysis results with SVO components
+ */
 function analyzeSVO($requirements)
 {
     $apiKey = $_ENV['GEMINI_API_KEY'] ?? null;
@@ -42,6 +63,8 @@ function analyzeSVO($requirements)
     ]);
 
     $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
     curl_close($ch);
 
     if (!$response) {
