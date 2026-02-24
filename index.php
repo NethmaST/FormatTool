@@ -1,57 +1,8 @@
-function analyzeSVO($requirements)
-{
-    $apiKey = $_ENV['GEMINI_API_KEY'] ?? null;
 
-    if (!$apiKey || empty($requirements)) {
-        return [];
-    }
 
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
-
-    $prompt = "Analyze requirements and return JSON with Subject, Verb, Object:\n\n";
-
-    foreach ($requirements as $req) {
-        $prompt .= "- " . $req . "\n";
-    }
-
-    $prompt .= "\nReturn JSON:\n{
-  \"results\": [
-    {\"requirement\": \"...\", \"subject\": \"...\", \"verb\": \"...\", \"object\": \"...\"}
-  ]
-}";
-
-    $data = [
-        "contents" => [
-            [
-                "parts" => [
-                    ["text" => $prompt]
-                ]
-            ]
-        ]
-    ];
-
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
-        CURLOPT_POSTFIELDS => json_encode($data),
-    ]);
-
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    if (!$response) {
-        return [];
-    }
-
-    $result = json_decode($response, true);
-
-    $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
-
-    return json_decode($text, true) ?? [];
-}
-
+<?php
+require 'functions.php';
+?>
 
 <?php
 ini_set('display_errors', 1);
@@ -330,8 +281,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'
                 $parts = explode('|',$d); ?>
                 <div class="card fr-type">
                     <strong><?php echo htmlspecialchars($k); ?></strong>
-                  <p><?php echo htmlspecialchars($item['text']); ?></p>
-
+                 <p><?php echo htmlspecialchars($d); ?></p>
+                 
 <!-- Analyze Button -->
 <button class="btn-primary analyze-btn" data-text="<?php echo htmlspecialchars($item['text']); ?>" style="margin-top:10px;">
     Analyze SVO
@@ -382,8 +333,11 @@ if(isset($_POST['doAnalyze']) && $_POST['analyze_text'] === $item['text']) {
     }
     ?>
     <?php
-$analysisJson = analyzeSVO($allRequirements);
-$analysisData = json_decode($analysisJson, true);
+if(empty($allRequirements)){
+    echo "<p>No requirements found to analyze.</p>";
+} else {
+    echo "<p>Extracted <strong>" . count($allRequirements) . "</strong> requirements for analysis.</p>";
+}
 ?>
 
 <?php
@@ -397,16 +351,19 @@ if (!empty($allRequirements)) {
 ?>
 
     <?php if (!empty($analysisData['results'])): ?>
+<h2>Clean Requirements (Point-wise)</h2>
+
 <ul style="line-height:1.8;">
-    <?php foreach ($analysisData['results'] as $row): ?>
+<?php foreach ($analysisMap as $requirement => $analysis): ?>
     <li>
-        <strong>Requirement:</strong> <?php echo htmlspecialchars($row['requirement']); ?><br>
-        <strong>S:</strong> <?php echo htmlspecialchars($row['subject']); ?><br>
-        <strong>V:</strong> <?php echo htmlspecialchars($row['verb']); ?><br>
-        <strong>O:</strong> <?php echo htmlspecialchars($row['object']); ?>
+        <strong>Requirement:</strong> <?php echo htmlspecialchars($requirement); ?><br>
+        <strong>SVO:</strong><br>
+        <?php echo $analysis; ?>
+        <hr>
     </li>
-    <?php endforeach; ?>
+<?php endforeach; ?>
 </ul>
+
 <?php else: ?>
 <p>No analysis data returned.</p>
 <?php endif; ?>
