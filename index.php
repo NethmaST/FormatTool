@@ -904,93 +904,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
 </div>
 
 <script>
-/**
- * Update file input display name
- */
-function updateFileName() {
-    const input = document.getElementById('fileInput');
-    if(input.files[0]) {
-        document.getElementById('fileName').innerText = input.files[0].name;
-    }
-}
+document.addEventListener("DOMContentLoaded", function() {
 
-// NAVIGATION VIEW SWITCH
-document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        const view = this.dataset.view;
-        document.querySelectorAll('.view-section').forEach(section => {
-            section.style.display = (section.id === view) ? 'block' : 'none';
+    // Update file input display name
+    function updateFileName() {
+        const input = document.getElementById('fileInput');
+        if(input && input.files[0]) {
+            document.getElementById('fileName').innerText = input.files[0].name;
+        }
+    }
+    window.updateFileName = updateFileName;
+
+    // NAVIGATION VIEW SWITCH (FIXED)
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            navButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const view = this.getAttribute('data-view');
+
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.style.display = (section.id === view) ? 'block' : 'none';
+            });
         });
     });
-});
 
-// DRAG AND DROP
-const dropZone = document.querySelector('.drop-zone');
-if (dropZone) {
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = 'var(--primary)';
-        dropZone.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 100%)';
-    });
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.style.borderColor = 'var(--primary-light)';
-        dropZone.style.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(139, 92, 246, 0) 100%)';
-    });
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const input = document.getElementById('fileInput');
-        if (e.dataTransfer.files.length > 0) {
-            input.files = e.dataTransfer.files;
-            updateFileName();
-        }
-    });
-}
+    // DRAG AND DROP
+    const dropZone = document.querySelector('.drop-zone');
+    if (dropZone) {
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--primary)';
+        });
 
-// SVO ANALYSIS AJAX
-document.querySelectorAll('.btn-analyze').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const text = this.getAttribute('data-text');
-        const resultBox = this.nextElementSibling;
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = 'var(--primary-light)';
+        });
 
-        resultBox.innerHTML = "🔄 Analyzing...";
-
-        fetch('analyze.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: 'text=' + encodeURIComponent(text)
-        })
-       .then(response => response.json())
-.then(data => {
-
-    if (!data.success) {
-        resultBox.innerHTML = "❌ " + data.error;
-        return;
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('fileInput');
+            if (e.dataTransfer.files.length > 0) {
+                input.files = e.dataTransfer.files;
+                updateFileName();
+            }
+        });
     }
 
-    // Text output
-    resultBox.innerHTML =
-        "<strong>SVO Analysis:</strong><br>" +
-        "Subject: " + data.subject + "<br>" +
-        "Verb: " + data.verb + "<br>" +
-        "Object: " + data.object;
+    // SVO ANALYSIS AJAX (UNCHANGED LOGIC)
+    document.querySelectorAll('.btn-analyze').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const text = this.getAttribute('data-text');
+            const resultBox = this.parentElement.querySelector('.svo-result');
+            const visual = this.parentElement.querySelector('.svo-visual');
 
-    // Visualization output
-    const visual = this.parentElement.querySelector('.svo-visual');
+            resultBox.innerHTML = "🔄 Analyzing...";
 
-    if (visual) {
-        visual.innerHTML = `
-            <div class="svo-box svo-subject">${data.subject}</div>
-            <div class="svo-arrow">→</div>
-            <div class="svo-box svo-verb">${data.verb}</div>
-            <div class="svo-arrow">→</div>
-            <div class="svo-box svo-object">${data.object}</div>
-        `;
-    }
-}).catch(err => {
-    resultBox.innerHTML = "❌ Error analyzing requirement.";
-    console.error(err); 
+            fetch('analyze.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'text=' + encodeURIComponent(text)
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (!data.success) {
+                    resultBox.innerHTML = "❌ " + data.error;
+                    return;
+                }
+
+                resultBox.innerHTML =
+                    "<strong>SVO Analysis:</strong><br>" +
+                    "Subject: " + data.subject + "<br>" +
+                    "Verb: " + data.verb + "<br>" +
+                    "Object: " + data.object;
+
+                if (visual) {
+                    visual.innerHTML = `
+                        <div class="svo-box svo-subject">${data.subject}</div>
+                        <div class="svo-arrow">→</div>
+                        <div class="svo-box svo-verb">${data.verb}</div>
+                        <div class="svo-arrow">→</div>
+                        <div class="svo-box svo-object">${data.object}</div>
+                    `;
+                }
+            })
+            .catch(() => {
+                resultBox.innerHTML = "❌ Error analyzing requirement.";
+            });
+        });
+    });
+
 });
 </script>
 </body>
