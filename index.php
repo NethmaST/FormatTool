@@ -852,6 +852,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                         <div class="card-content">
                             <?php echo htmlspecialchars($d); ?>
                         </div>
+                        <button class="btn-analyze" data-text="<?php echo htmlspecialchars($d); ?>">
+                            <i class="fas fa-brain"></i> Analyze SVO
+                        </button>
+                       <div class="svo-visual"></div>
+<div class="svo-result"></div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -869,39 +874,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
             foreach ($parsed['NFR'] as $req) {
                 $allRequirements[] = trim($req);
             }
-            $analysisMap = [];
-            if (!empty($allRequirements)) {
-                foreach ($allRequirements as $req) {
-                    $analysisMap[$req] = analyzeSVO($req);
-                }
-            }
             ?>
 
-    <?php if (!empty($analysisData['results'])): ?>
-<h2>Clean Requirements (Point-wise)</h2>
+            <?php if (!empty($allRequirements)): ?>
+                <h2>Clean Requirements (Point-wise)</h2>
+                <ul style="line-height:1.8;">
+                <?php foreach ($allRequirements as $requirement): ?>
+                    <li>
+                        <strong><?php echo htmlspecialchars($requirement); ?></strong>
+                    </li>
+                <?php endforeach; ?>
+                </ul>
 
-<ul style="line-height:1.8;">
-<?php foreach ($analysisMap as $requirement => $analysis): ?>
-    <li>
-        <strong>Requirement:</strong> <?php echo htmlspecialchars($requirement); ?><br>
-        <strong>SVO:</strong><br>
-        <?php echo $analysis; ?>
-        <hr>
-    </li>
-<?php endforeach; ?>
-</ul>
-
-<?php else: ?>
-<p>No analysis data returned.</p>
-<?php endif; ?>
-
-        <!-- Download PDF Button -->
-        <form method="post" action="download.php">
-            <input type="hidden" name="requirements" value="<?php echo htmlspecialchars(json_encode($allRequirements)); ?>">
-            <button type="submit" class="btn-primary" style="margin-top: 20px;">
-                <i class="fas fa-download"></i> Download PDF
-            </button>
-        </form>
+                <!-- Download PDF Button -->
+                <form method="post" action="download.php">
+                    <input type="hidden" name="requirements" value="<?php echo htmlspecialchars(json_encode($allRequirements)); ?>">
+                    <button type="submit" class="btn-primary" style="margin-top: 20px;">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </form>
+            <?php else: ?>
+                <div class="empty-state">
+                    <i class="fas fa-list"></i>
+                    <p>No requirements found</p>
+                </div>
+            <?php endif; ?>
+        </div>
     <?php endif; ?>
 </div>
 
