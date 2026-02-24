@@ -547,6 +547,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
             transform: translateY(0);
         }
 
+        .btn-analyze {
+            background: linear-gradient(135deg, var(--fr-accent) 0%, #1d4ed8 100%);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            font-family: 'Poppins', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 1rem;
+        }
+
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.5);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        }
+
+        .btn-analyze:active {
+            transform: translateY(0);
+        }
+
         /* ===== SVO ANALYSIS ===== */
         .svo-result {
             margin-top: 1rem;
@@ -772,6 +800,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                                 <i class="fas fa-check"></i> <?php echo htmlspecialchars(trim($sub)); ?>
                             </div>
                         <?php endforeach; ?>
+                        <button class="btn-analyze" data-text="<?php echo htmlspecialchars($d); ?>">
+                            <i class="fas fa-brain"></i> Analyze SVO
+                        </button>
+                        <div class="svo-result"></div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
