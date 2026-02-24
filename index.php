@@ -61,15 +61,19 @@ function parseTextSRS($text) {
         $clean = trim($line);
         if (empty($clean)) continue;
 
-        // Match FR-XX or FR-XX.XX pattern
-        if (preg_match('/FR[-_\s]?(\d{2}(?:\.\d{2})?)\s*[:\-]?\s*(.*)/i', $clean, $m)) {
+        // Remove leading bullet points (●, •, -, *)
+        $clean = preg_replace('/^[●•\-\*\s]+/', '', $clean);
+        $clean = trim($clean);
+
+        // Match FR-XX or FR-XX.XX pattern (with optional parentheses description)
+        if (preg_match('/^FR[-_\s]?(\d{2}(?:\.\d{2})?)\s*(?:\([^)]*\))?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
             $currentFR = 'FR-' . $m[1];
             $currentNFR = '';
             $frSections[$currentFR] = $m[2];
             $structured[] = ['type' => 'fr', 'key' => $currentFR, 'text' => $m[2]];
         }
-        // Match NFR-XX pattern
-        elseif (preg_match('/NFR[-_\s]?(\d{2})\s*[:\-]?\s*(.*)/i', $clean, $m)) {
+        // Match NFR-XX pattern (with optional parentheses description)
+        elseif (preg_match('/^NFR[-_\s]?(\d{2})\s*(?:\([^)]*\))?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
             $currentNFR = 'NFR-' . $m[1];
             $currentFR = '';
             $nfrSections[$currentNFR] = $m[2];
