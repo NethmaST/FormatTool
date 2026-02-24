@@ -963,14 +963,36 @@ document.querySelectorAll('.btn-analyze').forEach(btn => {
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: 'text=' + encodeURIComponent(text)
         })
-        .then(response => response.text())
-        .then(data => {
-            resultBox.innerHTML = "<strong>SVO Analysis:</strong><br>" + data;
-        })
-        .catch((error) => {
-            resultBox.innerHTML = "❌ Error analyzing: " + error.message;
-        });
-    });
+       .then(response => response.json())
+.then(data => {
+
+    if (!data.success) {
+        resultBox.innerHTML = "❌ " + data.error;
+        return;
+    }
+
+    // Text output
+    resultBox.innerHTML =
+        "<strong>SVO Analysis:</strong><br>" +
+        "Subject: " + data.subject + "<br>" +
+        "Verb: " + data.verb + "<br>" +
+        "Object: " + data.object;
+
+    // Visualization output
+    const visual = this.parentElement.querySelector('.svo-visual');
+
+    if (visual) {
+        visual.innerHTML = `
+            <div class="svo-box svo-subject">${data.subject}</div>
+            <div class="svo-arrow">→</div>
+            <div class="svo-box svo-verb">${data.verb}</div>
+            <div class="svo-arrow">→</div>
+            <div class="svo-box svo-object">${data.object}</div>
+        `;
+    }
+}).catch(err => {
+    resultBox.innerHTML = "❌ Error analyzing requirement.";
+    console.error(err); 
 });
 </script>
 </body>
