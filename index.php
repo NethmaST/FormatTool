@@ -813,8 +813,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                     <p>No Functional Requirements found</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($parsed['FR'] as $k => $d):
-                    $parts = explode('|', $d); ?>
+                <?php foreach ($parsed['FR'] as $k => $d): ?>
                     <div class="card fr-type">
                         <div class="card-header">
                             <span class="badge badge-fr"><i class="fas fa-code"></i> FR</span>
@@ -823,11 +822,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                         <div class="card-content">
                             <?php echo htmlspecialchars($d); ?>
                         </div>
-                        <?php foreach ($parts as $sub): ?>
-                            <div class="sub-requirement">
-                                <i class="fas fa-check"></i> <?php echo htmlspecialchars(trim($sub)); ?>
-                            </div>
-                        <?php endforeach; ?>
                         <button class="btn-analyze" data-text="<?php echo htmlspecialchars($d); ?>">
                             <i class="fas fa-brain"></i> Analyze SVO
                         </button>
