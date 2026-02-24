@@ -667,6 +667,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                 font-size: 1.5rem;
             }
         }
+   .svo-visual {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.svo-box {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    min-width: 90px;
+    text-align: center;
+}
+
+.svo-subject { background: #e0f2ff; color: #0369a1; }
+.svo-verb { background: #ede9fe; color: #5b21b6; }
+.svo-object { background: #ecfdf5; color: #047857; }
+
+.svo-arrow {
+    font-size: 1.2rem;
+    color: #6b7280;
+}
+
     </style>
 </head>
 <body>
@@ -803,7 +829,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                         <button class="btn-analyze" data-text="<?php echo htmlspecialchars($d); ?>">
                             <i class="fas fa-brain"></i> Analyze SVO
                         </button>
-                        <div class="svo-result"></div>
+                       <div class="svo-visual"></div>
+<div class="svo-result"></div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
