@@ -975,19 +975,19 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
 
                 resultBox.innerHTML =
-                    "<strong>SVO Analysis:</strong><br>" +
-                    "Subject: " + data.subject + "<br>" +
-                    "Verb: " + data.verb + "<br>" +
-                    "Object: " + data.object;
+    "<strong>SVO:</strong> " +
+    data.subject + " → " +
+    data.verb + " → " +
+    data.object;
 
-                if (visual) {
+                
+                if (data.subject && data.verb && data.object) {
                     visual.innerHTML = `
                         <div class="svo-box svo-subject">${data.subject}</div>
-                        <div class="svo-arrow">→</div>
+                        <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
                         <div class="svo-box svo-verb">${data.verb}</div>
-                        <div class="svo-arrow">→</div>
-                        <div class="svo-box svo-object">${data.object}</div>
-                    `;
+                        <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+                        <div class="svo-box svo-object">${data.object}</div>;
                 }
             })
             .catch(() => {
