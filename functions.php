@@ -56,34 +56,26 @@ function analyzeSVO($requirements)
             ["parts" => [["text" => $prompt]]]
         ]
     ];
+    set_time_limit(20);
+    
+$ch = curl_init($url);
 
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
-        CURLOPT_POSTFIELDS => json_encode($data),
-        CURLOPT_TIMEOUT => 30,
-    ]);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json'
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+curl_setopt($ch, CURLOPT_TIMEOUT, 15); // ⏳ limit to 15 seconds
 
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curlError = curl_error($ch);
-    curl_close($ch);
+$response = curl_exec($ch);
 
-    // Check for cURL errors
-    if ($curlError) {
-        return ['error' => "Network error: $curlError"];
-    }
+if (curl_errno($ch)) {
+    return "Curl Error: " . curl_error($ch);
+}
 
-    // Check for HTTP errors
-    if ($httpCode !== 200) {
-        return ['error' => "API returned HTTP $httpCode"];
-    }
+// DO NOT USE curl_close($ch); // not needed in PHP 8+
 
-    if (!$response) {
-        return ['error' => 'Empty response from Gemini API'];
-    }
 
     // Parse the API response
     $result = json_decode($response, true);
