@@ -851,12 +851,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                         </div>
                         <div class="card-content">
                             <?php echo htmlspecialchars($d); ?>
-                        </div>
-                        <button class="btn-analyze" data-text="<?php echo htmlspecialchars($d); ?>">
-                            <i class="fas fa-brain"></i> Analyze SVO
-                        </button>
-                       <div class="svo-visual"></div>
-<div class="svo-result"></div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
