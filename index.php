@@ -301,66 +301,129 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
             flex-grow: 1;
             padding: 3rem;
             overflow-y: auto;
-            background: var(--bg-body);
+            background: linear-gradient(135deg, #f0e7ff 0%, #e8f4f8 50%, #f0e7ff 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
         }
 
         /* ===== UPLOAD PAGE ===== */
         .upload-container {
             max-width: 700px;
-            margin: 80px auto;
-            background: var(--white);
+            margin: 60px auto;
+            background: rgba(255, 255, 255, 0.95);
             padding: 60px 45px;
-            border-radius: 20px;
-            box-shadow: var(--shadow-lg);
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(91, 33, 182, 0.15),
+                        0 0 1px rgba(0, 0, 0, 0.1);
             text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .upload-icon {
-            font-size: 4rem;
+            font-size: 5rem;
             color: var(--primary-light);
             margin-bottom: 1.5rem;
             animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(139, 92, 246, 0.2));
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-15px); }
         }
 
         .upload-container h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
+            font-size: 2.5rem;
+            font-weight: 800;
             color: var(--text-main);
-            margin: 0 0 0.5rem 0;
-            letter-spacing: -1px;
+            margin: 0 0 0.8rem 0;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .upload-container > p {
             color: var(--text-secondary);
-            font-size: 1.05rem;
-            margin: 0 0 2.5rem 0;
+            font-size: 1.1rem;
+            margin: 0 0 3rem 0;
+            font-weight: 500;
+            line-height: 1.6;
         }
 
         .drop-zone {
             border: 2px dashed var(--primary-light);
-            padding: 50px 30px;
-            border-radius: 16px;
+            padding: 60px 40px;
+            border-radius: 20px;
             margin: 30px 0;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             cursor: pointer;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(139, 92, 246, 0) 100%);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.02) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(139, 92, 246, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .drop-zone:hover::before {
+            opacity: 1;
         }
 
         .drop-zone:hover {
             border-color: var(--primary);
-            box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.25),
+                        inset 0 0 20px rgba(139, 92, 246, 0.05);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0.05) 100%);
+            transform: translateY(-3px);
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 100%);
+            box-shadow: 0 20px 50px rgba(139, 92, 246, 0.3);
+            transform: scale(1.02);
         }
 
         .drop-zone p {
             margin: 0;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-main);
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .drop-zone-hint {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            position: relative;
+            z-index: 1;
         }
 
         /* ===== ERROR MESSAGE ===== */
@@ -550,13 +613,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
             gap: 8px;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(91, 33, 182, 0.4);
         }
 
-        .btn-primary:active {
+        .btn-primary:active:not(:disabled) {
             transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background: linear-gradient(135deg, #c4b5fd 0%, #ddd6fe 100%);
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
         }
 
         .btn-analyze {
@@ -747,11 +817,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
             <?php endif; ?>
 
             <form method="post" enctype="multipart/form-data">
-                <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+                <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
                     <p id="fileName">📄 Drag & drop your file here or click to browse</p>
-                    <input type="file" name="srsFile" id="fileInput" accept=".pdf,.txt" required style="display:none;" onchange="updateFileName()">
+                    <div class="drop-zone-hint">Supports PDF and TXT files • Max 50MB</div>
+                    <input type="file" name="srsFile" id="fileInput" accept=".pdf,.txt" required style="display:none;" onchange="handleFileSelect()">
                 </div>
-                <button class="btn-primary" type="submit"><i class="fas fa-play"></i> Begin Analysis</button>
+                <button class="btn-primary" type="submit" id="submitBtn" disabled><i class="fas fa-play"></i> Begin Analysis</button>
+                <div id="fileInfo" style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);"></div>
             </form>
         </div>
     <?php else: ?>
@@ -906,14 +978,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-    // Update file input display name
-    function updateFileName() {
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    const ALLOWED_TYPES = ['application/pdf', 'text/plain'];
+    const fileInput = document.getElementById('fileInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const fileInfo = document.getElementById('fileInfo');
+    const dropZone = document.getElementById('dropZone');
+
+    // Handle file selection with validation
+    function handleFileSelect() {
         const input = document.getElementById('fileInput');
         if(input && input.files[0]) {
-            document.getElementById('fileName').innerText = input.files[0].name;
+            const file = input.files[0];
+            const validationResult = validateFile(file);
+            
+            if (!validationResult.valid) {
+                fileInfo.innerHTML = `<span style="color: #dc2626;">❌ ${validationResult.message}</span>`;
+                submitBtn.disabled = true;
+                document.getElementById('fileName').innerText = '📄 Drag & drop your file here or click to browse';
+                input.value = '';
+                return;
+            }
+
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            const fileName = file.name;
+            
+            document.getElementById('fileName').innerText = '✓ ' + fileName;
+            fileInfo.innerHTML = `<span style="color: var(--primary-light);">✓ File selected: ${fileName} (${sizeMB}MB)</span>`;
+            submitBtn.disabled = false;
         }
     }
-    window.updateFileName = updateFileName;
+
+    // Validate file
+    function validateFile(file) {
+        // Check file size
+        if (file.size > MAX_FILE_SIZE) {
+            return {
+                valid: false,
+                message: `File is too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Maximum 50MB allowed.`
+            };
+        }
+
+        // Check file type
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            return {
+                valid: false,
+                message: `Invalid file type. Only PDF and TXT files are allowed.`
+            };
+        }
+
+        return { valid: true };
+    }
+
+    // Make updateFileName globally available
+    window.handleFileSelect = handleFileSelect;
+    window.updateFileName = function() {
+        handleFileSelect();
+    };
 
     // NAVIGATION VIEW SWITCH (FIXED)
     const navButtons = document.querySelectorAll('.nav-btn');
@@ -930,24 +1051,25 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // DRAG AND DROP
-    const dropZone = document.querySelector('.drop-zone');
-    if (dropZone) {
-        dropZone.addEventListener('dragover', (e) => {
+    // DRAG AND DROP with enhanced feedback
+    const dragDropZone = document.getElementById('dropZone');
+    if (dragDropZone) {
+        dragDropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropZone.style.borderColor = 'var(--primary)';
+            dragDropZone.classList.add('drag-over');
         });
 
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.style.borderColor = 'var(--primary-light)';
+        dragDropZone.addEventListener('dragleave', () => {
+            dragDropZone.classList.remove('drag-over');
         });
 
-        dropZone.addEventListener('drop', (e) => {
+        dragDropZone.addEventListener('drop', (e) => {
             e.preventDefault();
+            dragDropZone.classList.remove('drag-over');
             const input = document.getElementById('fileInput');
             if (e.dataTransfer.files.length > 0) {
                 input.files = e.dataTransfer.files;
-                updateFileName();
+                handleFileSelect();
             }
         });
     }
