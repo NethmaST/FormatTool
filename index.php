@@ -829,8 +829,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                         <button class="btn-analyze" data-text="<?php echo htmlspecialchars($d); ?>">
                             <i class="fas fa-brain"></i> Analyze SVO
                         </button>
-                       <div class="svo-visual"></div>
-<div class="svo-result"></div>
+                        <div class="svo-visual"></div>
+                        <div class="svo-result"></div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -855,8 +855,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                         <button class="btn-analyze" data-text="<?php echo htmlspecialchars($d); ?>">
                             <i class="fas fa-brain"></i> Analyze SVO
                         </button>
-                       <div class="svo-visual"></div>
-<div class="svo-result"></div>
+                        <div class="svo-visual"></div>
+                        <div class="svo-result"></div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -987,7 +987,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
                         <div class="svo-box svo-verb">${data.verb}</div>
                         <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
-                        <div class="svo-box svo-object">${data.object}</div>;
+                        <div class="svo-box svo-object">${data.object}</div>
+                    `;
                 }
             })
             .catch(() => {
