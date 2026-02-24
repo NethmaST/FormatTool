@@ -1,20 +1,28 @@
 <?php
-/**
- * SRS Intelligence Portal - Main Application
- * A professional tool for analyzing System Requirements Specifications
- */
 
-require 'functions.php';
+// Load Composer (needed for phpdotenv)
+require 'vendor/autoload.php';
 
-// Error reporting configuration
+// Load .env file
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+// Get API key from .env
+$apiKey = $_ENV['GEMINI_API_KEY'] ?? null;
+
+if (!$apiKey) {
+    die("API key not found");
+}
+
+// Error reporting (for development)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Load autoloader
-if (file_exists('vendor/autoload.php')) {
-    require 'vendor/autoload.php';
-}
+// Load functions
+require 'functions.php';
+
+
 
 // Initialize application state
 $parsed = ['FR' => [], 'NFR' => [], 'STRUCTURED' => []];
@@ -771,21 +779,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                 </div>
             <?php else: ?>
                 <?php foreach ($parsed['STRUCTURED'] as $item): ?>
-                    <?php if ($item['type'] == 'fr'): ?>
-                        <div class="card fr-type">
-                            <div class="card-header">
-                                <span class="badge badge-fr"><i class="fas fa-code"></i> Functional</span>
-                                <h3 class="card-title"><?php echo htmlspecialchars($item['key']); ?></h3>
-                            </div>
-                            <div class="card-content">
-                                <?php echo htmlspecialchars($item['text']); ?>
-                            </div>
-                        </div>
-                    <?php elseif ($item['type'] == 'fr-sub'): ?>
-                        <div class="sub-requirement">
-                            <i class="fas fa-arrow-right"></i> <?php echo htmlspecialchars($item['text']); ?>
-                        </div>
-                    <?php elseif ($item['type'] == 'nfr'): ?>
+    <?php if ($item['type'] == 'fr'): ?>
+        <div class="card fr-type">
+            ...
+        </div>
+
+    <?php elseif ($item['type'] == 'fr-sub'): ?>
+        <?php continue; // skip sub-requirements in full view ?>
+
+    <?php elseif ($item['type'] == 'nfr'): ?>
                         <div class="card nfr-type">
                             <div class="card-header">
                                 <span class="badge badge-nfr"><i class="fas fa-shield-halved"></i> Non-Functional</span>
