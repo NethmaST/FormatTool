@@ -911,7 +911,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
         </div>
 
         <div class="svo-visual"></div>
-        <div class="svo-result"></div>
+<div class="svo-result"></div>
+
+<form method="get" action="checker.php">
+    <input type="hidden" name="requirement" value="<?php echo htmlspecialchars($d); ?>">
+    <button class="btn-analyze" type="submit">
+        <i class="fas fa-check-circle"></i> Open Shall/Should Checker
+    </button>
+</form>
     </div>
 <?php endforeach; ?>
 
