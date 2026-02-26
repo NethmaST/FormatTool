@@ -883,6 +883,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
         </div>
 
         <div id="fr" class="view-section" style="display:none;">
+            <div style="margin-bottom:20px;">
+    <button class="btn-primary" id="analyzeAllFR">
+        <i class="fas fa-brain"></i> Analyze All Functional Requirements
+    </button>
+</div>
             <?php if (empty($parsed['FR'])): ?>
                 <div class="empty-state">
                     <i class="fas fa-code"></i>
@@ -1118,6 +1123,77 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     });
+
+    // ANALYZE ALL FR
+const analyzeAllBtn = document.getElementById('analyzeAllFR');
+
+if (analyzeAllBtn) {
+    analyzeAllBtn.addEventListener('click', function () {
+
+        const frSection = document.getElementById('fr');
+        const allAnalyzeButtons = frSection.querySelectorAll('.btn-analyze');
+
+        if (allAnalyzeButtons.length === 0) {
+            alert("No Functional Requirements to analyze.");
+            return;
+        }
+
+        analyzeAllBtn.disabled = true;
+        analyzeAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing All...';
+
+        let completed = 0;
+
+        allAnalyzeButtons.forEach(btn => {
+
+            const text = btn.getAttribute('data-text');
+            const resultBox = btn.parentElement.querySelector('.svo-result');
+            const visual = btn.parentElement.querySelector('.svo-visual');
+
+            resultBox.innerHTML = "🔄 Analyzing...";
+
+            fetch('analyze.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'text=' + encodeURIComponent(text)
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (!data.success) {
+                    resultBox.innerHTML = "❌ " + data.error;
+                } else {
+                    resultBox.innerHTML =
+                        "<strong>SVO:</strong> " +
+                        data.subject + " → " +
+                        data.verb + " → " +
+                        data.object;
+
+                    if (data.subject && data.verb && data.object) {
+                        visual.innerHTML = `
+                            <div class="svo-box svo-subject">${data.subject}</div>
+                            <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+                            <div class="svo-box svo-verb">${data.verb}</div>
+                            <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+                            <div class="svo-box svo-object">${data.object}</div>
+                        `;
+                    }
+                }
+
+                completed++;
+
+                if (completed === allAnalyzeButtons.length) {
+                    analyzeAllBtn.disabled = false;
+                    analyzeAllBtn.innerHTML = '<i class="fas fa-brain"></i> Analyze All Functional Requirements';
+                }
+            })
+            .catch(() => {
+                resultBox.innerHTML = "❌ Error analyzing requirement.";
+                completed++;
+            });
+
+        });
+    });
+}
 
 });
 </script>
