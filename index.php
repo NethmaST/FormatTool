@@ -894,50 +894,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                     <p>No Functional Requirements found</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($parsed['FR'] as $k => $d): ?>
-                    <div class="card fr-type">
-                        <div class="card-header">
-                            <span class="badge badge-fr"><i class="fas fa-code"></i> FR</span>
-                            <h3 class="card-title"><?php echo htmlspecialchars($k); ?></h3>
-                        </div>
-                        <div class="card-content">
-                            <?php echo htmlspecialchars($d); ?>
-                        </div>
-                        <button class="btn-analyze" data-text="<?php echo htmlspecialchars($d); ?>">
-                            <i class="fas fa-brain"></i> Analyze SVO
-                        </button>
-                        <div class="svo-visual"></div>
-                        <div class="svo-result"></div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+      <?php foreach ($parsed['FR'] as $k => $d): ?>
+    <div class="card fr-type">
+        <div class="card-header">
+            <span class="badge badge-fr"><i class="fas fa-code"></i> FR</span>
+            <h3 class="card-title"><?php echo htmlspecialchars($k); ?></h3>
+        </div>
+        <div class="card-content">
+            <?php echo htmlspecialchars($d); ?>
         </div>
 
-        <div id="nfr" class="view-section" style="display:none;">
-            <?php if (empty($parsed['NFR'])): ?>
-                <div class="empty-state">
-                    <i class="fas fa-shield-halved"></i>
-                    <p>No Non-Functional Requirements found</p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($parsed['NFR'] as $k => $d): ?>
-                    <div class="card nfr-type">
-                        <div class="card-header">
-                            <span class="badge badge-nfr"><i class="fas fa-shield-halved"></i> NFR</span>
-                            <h3 class="card-title"><?php echo htmlspecialchars($k); ?></h3>
-                        </div>
-                        <div class="card-content">
-                            <?php echo htmlspecialchars($d); ?>
-                        </div>
-                        <button class="btn-analyze" data-text="<?php echo htmlspecialchars($d); ?>">
-                            <i class="fas fa-brain"></i> Analyze SVO
-                        </button>
-                        <div class="svo-visual"></div>
-                        <div class="svo-result"></div>
-                    </div>
-                <?php endforeach; ?>
+        <div class="svo-visual"></div>
+        <div class="svo-result"></div>
+    </div>
+<?php endforeach; ?>
+
             <?php endif; ?>
         </div>
+<div id="nfr" class="view-section" style="display:none;">
+    <?php if (empty($parsed['NFR'])): ?>
+        <div class="empty-state">
+            <i class="fas fa-shield-halved"></i>
+            <p>No Non-Functional Requirements found</p>
+        </div>
+    <?php else: ?>
+        <?php foreach ($parsed['NFR'] as $k => $d): ?>
+            <div class="card nfr-type">
+                <div class="card-header">
+                    <span class="badge badge-nfr"><i class="fas fa-shield-halved"></i> NFR</span>
+                    <h3 class="card-title"><?php echo htmlspecialchars($k); ?></h3>
+                </div>
+                <div class="card-content">
+                    <?php echo htmlspecialchars($d); ?>
+                </div>
+
+                <div class="svo-visual"></div>
+                <div class="svo-result"></div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
 
         <div id="clean" class="view-section" style="display:none;">
             <?php
@@ -979,69 +975,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
         </div>
     <?php endif; ?>
 </div>
-
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
     const ALLOWED_TYPES = ['application/pdf', 'text/plain'];
     const fileInput = document.getElementById('fileInput');
     const submitBtn = document.getElementById('submitBtn');
     const fileInfo = document.getElementById('fileInfo');
     const dropZone = document.getElementById('dropZone');
 
-    // Handle file selection with validation
     function handleFileSelect() {
-        const input = document.getElementById('fileInput');
-        if(input && input.files[0]) {
-            const file = input.files[0];
-            const validationResult = validateFile(file);
-            
-            if (!validationResult.valid) {
-                fileInfo.innerHTML = `<span style="color: #dc2626;">❌ ${validationResult.message}</span>`;
+        if (fileInput && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            if (file.size > MAX_FILE_SIZE) {
+                fileInfo.innerHTML = "❌ File too large";
                 submitBtn.disabled = true;
-                document.getElementById('fileName').innerText = '📄 Drag & drop your file here or click to browse';
-                input.value = '';
                 return;
             }
-
-            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            const fileName = file.name;
-            
-            document.getElementById('fileName').innerText = '✓ ' + fileName;
-            fileInfo.innerHTML = `<span style="color: var(--primary-light);">✓ File selected: ${fileName} (${sizeMB}MB)</span>`;
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                fileInfo.innerHTML = "❌ Invalid file type";
+                submitBtn.disabled = true;
+                return;
+            }
+            fileInfo.innerHTML = "✓ File selected";
             submitBtn.disabled = false;
         }
     }
 
-    // Validate file
-    function validateFile(file) {
-        // Check file size
-        if (file.size > MAX_FILE_SIZE) {
-            return {
-                valid: false,
-                message: `File is too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Maximum 50MB allowed.`
-            };
-        }
-
-        // Check file type
-        if (!ALLOWED_TYPES.includes(file.type)) {
-            return {
-                valid: false,
-                message: `Invalid file type. Only PDF and TXT files are allowed.`
-            };
-        }
-
-        return { valid: true };
-    }
-
-    // Make updateFileName globally available
     window.handleFileSelect = handleFileSelect;
-    window.updateFileName = function() {
-        handleFileSelect();
-    };
 
-    // NAVIGATION VIEW SWITCH (FIXED)
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -1049,151 +1012,100 @@ document.addEventListener("DOMContentLoaded", function() {
             this.classList.add('active');
 
             const view = this.getAttribute('data-view');
-
             document.querySelectorAll('.view-section').forEach(section => {
                 section.style.display = (section.id === view) ? 'block' : 'none';
             });
         });
     });
 
-    // DRAG AND DROP with enhanced feedback
-    const dragDropZone = document.getElementById('dropZone');
-    if (dragDropZone) {
-        dragDropZone.addEventListener('dragover', (e) => {
+    // DRAG & DROP
+    if (dropZone) {
+        dropZone.addEventListener('dragover', e => {
             e.preventDefault();
-            dragDropZone.classList.add('drag-over');
+            dropZone.classList.add('drag-over');
         });
-
-        dragDropZone.addEventListener('dragleave', () => {
-            dragDropZone.classList.remove('drag-over');
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
         });
-
-        dragDropZone.addEventListener('drop', (e) => {
+        dropZone.addEventListener('drop', e => {
             e.preventDefault();
-            dragDropZone.classList.remove('drag-over');
-            const input = document.getElementById('fileInput');
+            dropZone.classList.remove('drag-over');
             if (e.dataTransfer.files.length > 0) {
-                input.files = e.dataTransfer.files;
+                fileInput.files = e.dataTransfer.files;
                 handleFileSelect();
             }
         });
     }
 
-    // SVO ANALYSIS AJAX (UNCHANGED LOGIC)
-    document.querySelectorAll('.btn-analyze').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const text = this.getAttribute('data-text');
-            const resultBox = this.parentElement.querySelector('.svo-result');
-            const visual = this.parentElement.querySelector('.svo-visual');
-
-            resultBox.innerHTML = "🔄 Analyzing...";
-
-            fetch('analyze.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'text=' + encodeURIComponent(text)
-            })
-            .then(response => response.json())
-            .then(data => {
-
-                if (!data.success) {
-                    resultBox.innerHTML = "❌ " + data.error;
-                    return;
-                }
-
-                resultBox.innerHTML =
-    "<strong>SVO:</strong> " +
-    data.subject + " → " +
-    data.verb + " → " +
-    data.object;
-
-                
-                if (data.subject && data.verb && data.object) {
-                    visual.innerHTML = `
-                        <div class="svo-box svo-subject">${data.subject}</div>
-                        <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
-                        <div class="svo-box svo-verb">${data.verb}</div>
-                        <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
-                        <div class="svo-box svo-object">${data.object}</div>
-                    `;
-                }
-            })
-            .catch(() => {
-                resultBox.innerHTML = "❌ Error analyzing requirement.";
-            });
-        });
-    });
-
     // ANALYZE ALL FR
-const analyzeAllBtn = document.getElementById('analyzeAllFR');
+    const analyzeAllBtn = document.getElementById('analyzeAllFR');
 
-if (analyzeAllBtn) {
-    analyzeAllBtn.addEventListener('click', function () {
+    if (analyzeAllBtn) {
+        analyzeAllBtn.addEventListener('click', function () {
 
-        const frSection = document.getElementById('fr');
-        const allAnalyzeButtons = frSection.querySelectorAll('.btn-analyze');
+            const frSection = document.getElementById('fr');
+            const cards = frSection.querySelectorAll('.card');
 
-        if (allAnalyzeButtons.length === 0) {
-            alert("No Functional Requirements to analyze.");
-            return;
-        }
+            if (cards.length === 0) {
+                alert("No Functional Requirements to analyze.");
+                return;
+            }
 
-        analyzeAllBtn.disabled = true;
-        analyzeAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing All...';
+            analyzeAllBtn.disabled = true;
+            analyzeAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing All...';
 
-        let completed = 0;
+            let completed = 0;
 
-        allAnalyzeButtons.forEach(btn => {
+            cards.forEach(card => {
 
-            const text = btn.getAttribute('data-text');
-            const resultBox = btn.parentElement.querySelector('.svo-result');
-            const visual = btn.parentElement.querySelector('.svo-visual');
+                const text = card.querySelector('.card-content').innerText;
+                const resultBox = card.querySelector('.svo-result');
+                const visual = card.querySelector('.svo-visual');
 
-            resultBox.innerHTML = "🔄 Analyzing...";
+                resultBox.innerHTML = "🔄 Analyzing...";
 
-            fetch('analyze.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'text=' + encodeURIComponent(text)
-            })
-            .then(response => response.json())
-            .then(data => {
+                fetch('analyze.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'text=' + encodeURIComponent(text)
+                })
+                .then(response => response.json())
+                .then(data => {
 
-                if (!data.success) {
-                    resultBox.innerHTML = "❌ " + data.error;
-                } else {
-                    resultBox.innerHTML =
-                        "<strong>SVO:</strong> " +
-                        data.subject + " → " +
-                        data.verb + " → " +
-                        data.object;
+                    if (!data.success) {
+                        resultBox.innerHTML = "❌ " + data.error;
+                    } else {
+                        resultBox.innerHTML =
+                            "<strong>SVO:</strong> " +
+                            data.subject + " → " +
+                            data.verb + " → " +
+                            data.object;
 
-                    if (data.subject && data.verb && data.object) {
-                        visual.innerHTML = `
-                            <div class="svo-box svo-subject">${data.subject}</div>
-                            <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
-                            <div class="svo-box svo-verb">${data.verb}</div>
-                            <div class="svo-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
-                            <div class="svo-box svo-object">${data.object}</div>
-                        `;
+                        if (data.subject && data.verb && data.object) {
+                            visual.innerHTML = `
+                                <div class="svo-box svo-subject">${data.subject}</div>
+                                <div class="svo-arrow">→</div>
+                                <div class="svo-box svo-verb">${data.verb}</div>
+                                <div class="svo-arrow">→</div>
+                                <div class="svo-box svo-object">${data.object}</div>
+                            `;
+                        }
                     }
-                }
 
-                completed++;
+                    completed++;
 
-                if (completed === allAnalyzeButtons.length) {
-                    analyzeAllBtn.disabled = false;
-                    analyzeAllBtn.innerHTML = '<i class="fas fa-brain"></i> Analyze All Functional Requirements';
-                }
-            })
-            .catch(() => {
-                resultBox.innerHTML = "❌ Error analyzing requirement.";
-                completed++;
+                    if (completed === cards.length) {
+                        analyzeAllBtn.disabled = false;
+                        analyzeAllBtn.innerHTML = '<i class="fas fa-brain"></i> Analyze All Functional Requirements';
+                    }
+                })
+                .catch(() => {
+                    resultBox.innerHTML = "❌ Error analyzing requirement.";
+                    completed++;
+                });
             });
-
         });
-    });
-}
+    }
 
 });
 </script>
