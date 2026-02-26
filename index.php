@@ -991,23 +991,29 @@ document.addEventListener("DOMContentLoaded", function() {
     const fileInfo = document.getElementById('fileInfo');
     const dropZone = document.getElementById('dropZone');
 
-    function handleFileSelect() {
-        if (fileInput && fileInput.files[0]) {
-            const file = fileInput.files[0];
-            if (file.size > MAX_FILE_SIZE) {
-                fileInfo.innerHTML = "❌ File too large";
-                submitBtn.disabled = true;
-                return;
-            }
-            if (!ALLOWED_TYPES.includes(file.type)) {
-                fileInfo.innerHTML = "❌ Invalid file type";
-                submitBtn.disabled = true;
-                return;
-            }
-            fileInfo.innerHTML = "✓ File selected";
-            submitBtn.disabled = false;
+   function handleFileSelect() {
+    if (fileInput && fileInput.files[0]) {
+        const file = fileInput.files[0];
+
+        console.log(file.type); // debug (you can remove later)
+
+        if (file.size > MAX_FILE_SIZE) {
+            fileInfo.innerHTML = "❌ File too large";
+            submitBtn.disabled = true;
+            return;
         }
+
+        // FIXED TYPE CHECK
+        if (!file.type.includes('pdf') && file.type !== 'application/octet-stream') {
+            fileInfo.innerHTML = "❌ Invalid file type";
+            submitBtn.disabled = true;
+            return;
+        }
+
+        fileInfo.innerHTML = "✓ File selected";
+        submitBtn.disabled = false;
     }
+} 
 
     window.handleFileSelect = handleFileSelect;
 
