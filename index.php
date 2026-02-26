@@ -991,11 +991,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const fileInfo = document.getElementById('fileInfo');
     const dropZone = document.getElementById('dropZone');
 
-   function handleFileSelect() {
-    if (fileInput && fileInput.files[0]) {
-        const file = fileInput.files[0];
+    function handleFileSelect() {
+        if (!fileInput || !fileInput.files.length) return;
 
-        console.log(file.type); // debug (you can remove later)
+        const file = fileInput.files[0];
+        console.log(file.type);
 
         if (file.size > MAX_FILE_SIZE) {
             fileInfo.innerHTML = "❌ File too large";
@@ -1003,8 +1003,8 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // FIXED TYPE CHECK
-        if (!file.type.includes('pdf') && file.type !== 'application/octet-stream') {
+        // Accept PDF or browser fallback type
+        if (!(file.type.includes('pdf') || file.type === 'application/octet-stream')) {
             fileInfo.innerHTML = "❌ Invalid file type";
             submitBtn.disabled = true;
             return;
@@ -1013,10 +1013,36 @@ document.addEventListener("DOMContentLoaded", function() {
         fileInfo.innerHTML = "✓ File selected";
         submitBtn.disabled = false;
     }
-} 
 
     window.handleFileSelect = handleFileSelect;
 
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+    }
+
+    // DRAG & DROP
+    if (dropZone) {
+        dropZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
+    }
+
+    // NAVIGATION
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -1030,31 +1056,11 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // DRAG & DROP
-    if (dropZone) {
-        dropZone.addEventListener('dragover', e => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
-        });
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            if (e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                handleFileSelect();
-            }
-        });
-    }
-
     // ANALYZE ALL FR
     const analyzeAllBtn = document.getElementById('analyzeAllFR');
 
     if (analyzeAllBtn) {
         analyzeAllBtn.addEventListener('click', function () {
-
             const frSection = document.getElementById('fr');
             const cards = frSection.querySelectorAll('.card');
 
@@ -1064,20 +1070,17 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             const progressContainer = document.getElementById('progressContainer');
-const progressBar = document.getElementById('progressBar');
-const progressText = document.getElementById('progressText');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
 
-progressContainer.style.display = 'block';
-progressBar.style.width = '0%';
-progressText.innerText = 'Analyzing...';
-
-let completed = 0;
-const total = cards.length;
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.innerText = 'Analyzing...';
 
             let completed = 0;
+            const total = cards.length;
 
             cards.forEach(card => {
-
                 const text = card.querySelector('.card-content').innerText;
                 const resultBox = card.querySelector('.svo-result');
                 const visual = card.querySelector('.svo-visual');
@@ -1091,7 +1094,6 @@ const total = cards.length;
                 })
                 .then(response => response.json())
                 .then(data => {
-
                     if (!data.success) {
                         resultBox.innerHTML = "❌ " + data.error;
                     } else {
@@ -1113,24 +1115,18 @@ const total = cards.length;
                     }
 
                     completed++;
+                    let percent = Math.round((completed / total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressText.innerText = `Analyzing... ${percent}%`;
 
-let percent = Math.round((completed / total) * 100);
-progressBar.style.width = percent + '%';
-progressText.innerText = `Analyzing... ${percent}%`;
-
-if (completed === total) {
-    analyzeAllBtn.disabled = false;
-    analyzeAllBtn.innerHTML = '<i class="fas fa-brain"></i> Analyze All Functional Requirements';
-
-    progressText.innerText = 'Analysis complete!';
-    setTimeout(() => {
-        progressContainer.style.display = 'none';
-    }, 1500);
-}
-
-                    if (completed === cards.length) {
+                    if (completed === total) {
                         analyzeAllBtn.disabled = false;
                         analyzeAllBtn.innerHTML = '<i class="fas fa-brain"></i> Analyze All Functional Requirements';
+                        progressText.innerText = 'Analysis complete!';
+
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                        }, 1500);
                     }
                 })
                 .catch(() => {
@@ -1140,7 +1136,6 @@ if (completed === total) {
             });
         });
     }
-
 });
 </script>
 </body>
