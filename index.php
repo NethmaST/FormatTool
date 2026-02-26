@@ -1057,8 +1057,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 return;
             }
 
-            analyzeAllBtn.disabled = true;
-            analyzeAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing All...';
+            const progressContainer = document.getElementById('progressContainer');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+
+progressContainer.style.display = 'block';
+progressBar.style.width = '0%';
+progressText.innerText = 'Analyzing...';
+
+let completed = 0;
+const total = cards.length;
 
             let completed = 0;
 
@@ -1099,6 +1107,20 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
 
                     completed++;
+
+let percent = Math.round((completed / total) * 100);
+progressBar.style.width = percent + '%';
+progressText.innerText = `Analyzing... ${percent}%`;
+
+if (completed === total) {
+    analyzeAllBtn.disabled = false;
+    analyzeAllBtn.innerHTML = '<i class="fas fa-brain"></i> Analyze All Functional Requirements';
+
+    progressText.innerText = 'Analysis complete!';
+    setTimeout(() => {
+        progressContainer.style.display = 'none';
+    }, 1500);
+}
 
                     if (completed === cards.length) {
                         analyzeAllBtn.disabled = false;
