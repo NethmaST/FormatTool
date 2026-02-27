@@ -988,162 +988,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
         </div>
     <?php endif; ?>
 </div>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-
-    const MAX_FILE_SIZE = 50 * 1024 * 1024;
-    const ALLOWED_TYPES = ['application/pdf', 'text/plain'];
-    const fileInput = document.getElementById('fileInput');
-    const submitBtn = document.getElementById('submitBtn');
-    const fileInfo = document.getElementById('fileInfo');
-    const dropZone = document.getElementById('dropZone');
-
-    function handleFileSelect() {
-        if (!fileInput || !fileInput.files.length) return;
-
-        const file = fileInput.files[0];
-        console.log(file.type);
-
-        if (file.size > MAX_FILE_SIZE) {
-            fileInfo.innerHTML = "❌ File too large";
-            submitBtn.disabled = true;
-            return;
-        }
-
-        // Accept PDF or browser fallback type
-        if (!(file.type.includes('pdf') || file.type === 'application/octet-stream')) {
-            fileInfo.innerHTML = "❌ Invalid file type";
-            submitBtn.disabled = true;
-            return;
-        }
-
-        fileInfo.innerHTML = "✓ File selected";
-        submitBtn.disabled = false;
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        background: #f4f6f9;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
     }
 
-    window.handleFileSelect = handleFileSelect;
-
-    if (fileInput) {
-        fileInput.addEventListener('change', handleFileSelect);
+    .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        max-width: 600px;
+        width: 100%;
     }
 
-    // DRAG & DROP
-    if (dropZone) {
-        dropZone.addEventListener('dragover', e => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
-        });
-
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-
-            if (e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                handleFileSelect();
-            }
-        });
+    h2 {
+        margin-top: 0;
+        color: #1f2937;
     }
 
-    // NAVIGATION
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            navButtons.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-
-            const view = this.getAttribute('data-view');
-            document.querySelectorAll('.view-section').forEach(section => {
-                section.style.display = (section.id === view) ? 'block' : 'none';
-            });
-        });
-    });
-
-    // ANALYZE ALL FR
-    const analyzeAllBtn = document.getElementById('analyzeAllFR');
-
-    if (analyzeAllBtn) {
-        analyzeAllBtn.addEventListener('click', function () {
-            const frSection = document.getElementById('fr');
-            const cards = frSection.querySelectorAll('.card');
-
-            if (cards.length === 0) {
-                alert("No Functional Requirements to analyze.");
-                return;
-            }
-
-            const progressContainer = document.getElementById('progressContainer');
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
-
-            progressContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            progressText.innerText = 'Analyzing...';
-
-            let completed = 0;
-            const total = cards.length;
-
-            cards.forEach(card => {
-                const text = card.querySelector('.card-content').innerText;
-                const resultBox = card.querySelector('.svo-result');
-                const visual = card.querySelector('.svo-visual');
-
-                resultBox.innerHTML = "🔄 Analyzing...";
-
-                fetch('analyze.php', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'text=' + encodeURIComponent(text)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        resultBox.innerHTML = "❌ " + data.error;
-                    } else {
-                        resultBox.innerHTML =
-                            "<strong>SVO:</strong> " +
-                            data.subject + " → " +
-                            data.verb + " → " +
-                            data.object;
-
-                        if (data.subject && data.verb && data.object) {
-                            visual.innerHTML = `
-                                <div class="svo-box svo-subject">${data.subject}</div>
-                                <div class="svo-arrow">→</div>
-                                <div class="svo-box svo-verb">${data.verb}</div>
-                                <div class="svo-arrow">→</div>
-                                <div class="svo-box svo-object">${data.object}</div>
-                            `;
-                        }
-                    }
-
-                    completed++;
-                    let percent = Math.round((completed / total) * 100);
-                    progressBar.style.width = percent + '%';
-                    progressText.innerText = `Analyzing... ${percent}%`;
-
-                    if (completed === total) {
-                        analyzeAllBtn.disabled = false;
-                        analyzeAllBtn.innerHTML = '<i class="fas fa-brain"></i> Analyze All Functional Requirements';
-                        progressText.innerText = 'Analysis complete!';
-
-                        setTimeout(() => {
-                            progressContainer.style.display = 'none';
-                        }, 1500);
-                    }
-                })
-                .catch(() => {
-                    resultBox.innerHTML = "❌ Error analyzing requirement.";
-                    completed++;
-                });
-            });
-        });
+    input[type=text] {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-size: 15px;
     }
-});
-</script>
+
+    button {
+        margin-top: 12px;
+        padding: 12px 18px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    button:hover {
+        background: #1d4ed8;
+    }
+
+    .result {
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .ok {
+        background: #ecfdf3;
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+
+    .bad {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+</style>
 </body>
 </html>
