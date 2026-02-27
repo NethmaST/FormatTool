@@ -863,7 +863,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                 <?php foreach ($parsed['STRUCTURED'] as $item): ?>
     <?php if ($item['type'] == 'fr'): ?>
         <div class="card fr-type">
-            
+        <div class="card-header">
+        <span class="badge badge-fr"><i class="fas fa-code"></i> Functional</span>
+        <h3 class="card-title"><?php echo htmlspecialchars($item['key']); ?></h3>
+    </div>
+    <div class="card-content">
+        <?php echo htmlspecialchars($item['text']); ?>
+    </div>
         </div>
 
     <?php elseif ($item['type'] == 'fr-sub'): ?>
