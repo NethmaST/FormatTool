@@ -863,7 +863,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                 <?php foreach ($parsed['STRUCTURED'] as $item): ?>
     <?php if ($item['type'] == 'fr'): ?>
         <div class="card fr-type">
-            ...
+            
         </div>
 
     <?php elseif ($item['type'] == 'fr-sub'): ?>
@@ -988,70 +988,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
         </div>
     <?php endif; ?>
 </div>
-<style>
-    body {
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        background: #f4f6f9;
-        padding: 40px;
-        display: flex;
-        justify-content: center;
-    }
 
-    .container {
-        background: white;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-        max-width: 600px;
-        width: 100%;
-    }
-
-    h2 {
-        margin-top: 0;
-        color: #1f2937;
-    }
-
-    input[type=text] {
-        width: 100%;
-        padding: 12px;
-        border-radius: 8px;
-        border: 1px solid #d1d5db;
-        font-size: 15px;
-    }
-
-    button {
-        margin-top: 12px;
-        padding: 12px 18px;
-        background: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-    }
-
-    button:hover {
-        background: #1d4ed8;
-    }
-
-    .result {
-        margin-top: 20px;
-        padding: 12px;
-        border-radius: 8px;
-        font-weight: 600;
-    }
-
-    .ok {
-        background: #ecfdf3;
-        color: #166534;
-        border: 1px solid #86efac;
-    }
-
-    .bad {
-        background: #fef2f2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
-</style>
 </body>
 </html>
