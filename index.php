@@ -117,17 +117,16 @@ function parseTextSRS($text) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
 
     if ($_FILES['srsFile']['error'] !== UPLOAD_ERR_OK) {
-        die("Upload error code: " . $_FILES['srsFile']['error']);
+        $errorMessage = "Upload error code: " . $_FILES['srsFile']['error'];
     }
-
-    if (!is_uploaded_file($_FILES['srsFile']['tmp_name'])) {
-        die("File not uploaded properly.");
+    elseif (!is_uploaded_file($_FILES['srsFile']['tmp_name'])) {
+        $errorMessage = "File not uploaded properly.";
     }
-
-    $file = $_FILES['srsFile']['tmp_name'];
-    $fileName = $_FILES['srsFile']['name'];
-    $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-    $text = '';
+    else {
+        $file = $_FILES['srsFile']['tmp_name'];
+        $fileName = $_FILES['srsFile']['name'];
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $text = '';
 
     // Validate file type
     if (!in_array($ext, ['pdf', 'txt'])) {
@@ -144,8 +143,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
         } else {
             $parsed = parseTextSRS($text);
             $showViewer = true;
+   
         }
     }
+}
 }
 ?>
 
