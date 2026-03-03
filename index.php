@@ -114,8 +114,17 @@ function parseTextSRS($text) {
 
 // Process file upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
- 
-    
+
+    // Check upload error
+    if ($_FILES['srsFile']['error'] !== UPLOAD_ERR_OK) {
+        die("Upload error code: " . $_FILES['srsFile']['error']);
+    }
+
+    // Validate file existence
+    if (!is_uploaded_file($_FILES['srsFile']['tmp_name'])) {
+        die("File upload failed. File not found in temp directory.");
+    }
+
     $file = $_FILES['srsFile']['tmp_name'];
     $fileName = $_FILES['srsFile']['name'];
     $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
