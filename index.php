@@ -112,13 +112,9 @@ function parseTextSRS($text) {
     return ['FR' => $frSections, 'NFR' => $nfrSections, 'STRUCTURED' => $structured];
 }
 
-// Process file upload
-// Process file upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    if (!isset($_FILES['srsFile'])) {
-        die("No file uploaded.");
-    }
+// Process file upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
 
     if ($_FILES['srsFile']['error'] !== UPLOAD_ERR_OK) {
         die("Upload error code: " . $_FILES['srsFile']['error']);
