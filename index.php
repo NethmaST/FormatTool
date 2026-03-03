@@ -1002,194 +1002,202 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
 </div>
 
 <script>
-// Drag and drop functionality
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-const submitBtn = document.getElementById('submitBtn');
-const fileInfo = document.getElementById('fileInfo');
-
-// Prevent default drag behaviors
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, preventDefaults, false);
-    document.body.addEventListener(eventName, preventDefaults, false);
-});
-
-function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-// Highlight drop zone when item is dragged over it
-['dragenter', 'dragover'].forEach(eventName => {
-    dropZone.addEventListener(eventName, highlight, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, unhighlight, false);
-});
-
-function highlight(e) {
-    dropZone.classList.add('drag-over');
-}
-
-function unhighlight(e) {
-    dropZone.classList.remove('drag-over');
-}
-
-// Handle dropped files
-dropZone.addEventListener('drop', handleDrop, false);
-
-function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-    fileInput.files = files;
-    handleFileSelect();
-}
-
-// Handle file selection
-function handleFileSelect() {
-    const file = fileInput.files[0];
-    const fileName = document.getElementById('fileName');
+document.addEventListener('DOMContentLoaded', function() {
+    // Drag and drop functionality
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const submitBtn = document.getElementById('submitBtn');
     const fileInfo = document.getElementById('fileInfo');
-    
-    if (!file) {
-        return;
-    }
 
-    const validTypes = ['application/pdf', 'text/plain'];
-    const fiveMB = 5 * 1024 * 1024;
+    if (dropZone && fileInput) {
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
 
-    if (!validTypes.includes(file.type) && !file.name.endsWith('.pdf') && !file.name.endsWith('.txt')) {
-        fileInfo.textContent = '❌ Invalid file type. Please upload a PDF or TXT file.';
-        submitBtn.disabled = true;
-        return;
-    }
-
-    if (file.size > fiveMB) {
-        fileInfo.textContent = '❌ File size exceeds 5MB limit.';
-        submitBtn.disabled = true;
-        return;
-    }
-
-    fileName.textContent = '✓ ' + file.name + ' (' + formatFileSize(file.size) + ')';
-    fileInfo.textContent = '✓ File ready for upload';
-    submitBtn.disabled = false;
-}
-
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-}
-
-// Navigation sidebar functionality
-<?php if ($showViewer): ?>
-const navBtns = document.querySelectorAll('.nav-btn');
-const viewSections = document.querySelectorAll('.view-section');
-
-navBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        // Remove active class from all buttons
-        navBtns.forEach(b => b.classList.remove('active'));
-        
-        // Add active class to clicked button
-        btn.classList.add('active');
-        
-        // Hide all view sections
-        viewSections.forEach(section => section.style.display = 'none');
-        
-        // Show selected view
-        const viewId = btn.getAttribute('data-view');
-        document.getElementById(viewId).style.display = 'block';
-    });
-});
-
-// SVO Analysis functionality
-const analyzeAllFRBtn = document.getElementById('analyzeAllFR');
-if (analyzeAllFRBtn) {
-    analyzeAllFRBtn.addEventListener('click', analyzeAllFunctionalRequirements);
-}
-
-function analyzeAllFunctionalRequirements() {
-    const frCards = document.querySelectorAll('#fr .card.fr-type');
-    let currentIndex = 0;
-
-    function analyzeNext() {
-        if (currentIndex >= frCards.length) {
-            alert('Analysis complete!');
-            return;
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
         }
 
-        const card = frCards[currentIndex];
-        const requirementText = card.querySelector('.card-content').textContent.trim();
-        
-        // Show progress
-        const progressContainer = document.getElementById('progressContainer');
-        if (progressContainer) {
-            progressContainer.style.display = 'block';
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
-            const progress = ((currentIndex + 1) / frCards.length) * 100;
-            progressBar.style.width = progress + '%';
-            progressText.textContent = `Analyzing requirement ${currentIndex + 1} of ${frCards.length}...`;
+        // Highlight drop zone when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('drag-over');
         }
 
-        analyzeSVO(requirementText, card, () => {
-            currentIndex++;
-            setTimeout(analyzeNext, 1000); // Small delay between requests
+        function unhighlight(e) {
+            dropZone.classList.remove('drag-over');
+        }
+
+        // Handle dropped files
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            handleFileSelect();
+        }
+
+        // Handle file selection
+        window.handleFileSelect = function() {
+            const file = fileInput.files[0];
+            const fileName = document.getElementById('fileName');
+            const fileInfo = document.getElementById('fileInfo');
+            
+            if (!file) {
+                return;
+            }
+
+            const validTypes = ['application/pdf', 'text/plain'];
+            const fiveMB = 5 * 1024 * 1024;
+
+            if (!validTypes.includes(file.type) && !file.name.endsWith('.pdf') && !file.name.endsWith('.txt')) {
+                fileInfo.textContent = '❌ Invalid file type. Please upload a PDF or TXT file.';
+                submitBtn.disabled = true;
+                return;
+            }
+
+            if (file.size > fiveMB) {
+                fileInfo.textContent = '❌ File size exceeds 5MB limit.';
+                submitBtn.disabled = true;
+                return;
+            }
+
+            fileName.textContent = '✓ ' + file.name + ' (' + formatFileSize(file.size) + ')';
+            fileInfo.textContent = '✓ File ready for upload';
+            submitBtn.disabled = false;
+        };
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+    }
+
+    // Navigation sidebar functionality
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const viewSections = document.querySelectorAll('.view-section');
+
+    if (navBtns.length > 0 && viewSections.length > 0) {
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Remove active class from all buttons
+                navBtns.forEach(b => b.classList.remove('active'));
+                
+                // Add active class to clicked button
+                btn.classList.add('active');
+                
+                // Hide all view sections
+                viewSections.forEach(section => section.style.display = 'none');
+                
+                // Show selected view
+                const viewId = btn.getAttribute('data-view');
+                const selectedView = document.getElementById(viewId);
+                if (selectedView) {
+                    selectedView.style.display = 'block';
+                }
+            });
         });
     }
 
-    analyzeNext();
-}
+    // SVO Analysis functionality
+    const analyzeAllFRBtn = document.getElementById('analyzeAllFR');
+    if (analyzeAllFRBtn) {
+        analyzeAllFRBtn.addEventListener('click', analyzeAllFunctionalRequirements);
+    }
 
-function analyzeSVO(text, cardElement, callback) {
-    const formData = new FormData();
-    formData.append('text', text);
+    function analyzeAllFunctionalRequirements() {
+        const frCards = document.querySelectorAll('#fr .card.fr-type');
+        let currentIndex = 0;
 
-    fetch('analyze.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const svoVisual = cardElement.querySelector('.svo-visual');
-            const svoResult = cardElement.querySelector('.svo-result');
+        function analyzeNext() {
+            if (currentIndex >= frCards.length) {
+                alert('Analysis complete!');
+                return;
+            }
 
-            svoVisual.innerHTML = `
-                <div class="svo-box svo-subject">${escapeHtml(data.subject || 'N/A')}</div>
-                <div class="svo-arrow">→</div>
-                <div class="svo-box svo-verb">${escapeHtml(data.verb || 'N/A')}</div>
-                <div class="svo-arrow">→</div>
-                <div class="svo-box svo-object">${escapeHtml(data.object || 'N/A')}</div>
-            `;
+            const card = frCards[currentIndex];
+            const requirementText = card.querySelector('.card-content').textContent.trim();
+            
+            // Show progress
+            const progressContainer = document.getElementById('progressContainer');
+            if (progressContainer) {
+                progressContainer.style.display = 'block';
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                const progress = ((currentIndex + 1) / frCards.length) * 100;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = `Analyzing requirement ${currentIndex + 1} of ${frCards.length}...`;
+            }
 
-            svoResult.innerHTML = `
-                <strong>SVO Analysis:</strong>
-                Subject: <strong>${escapeHtml(data.subject || 'N/A')}</strong><br>
-                Verb: <strong>${escapeHtml(data.verb || 'N/A')}</strong><br>
-                Object: <strong>${escapeHtml(data.object || 'N/A')}</strong>
-            `;
-        } else {
-            cardElement.querySelector('.svo-result').innerHTML = `<span style="color: red;">Error: ${escapeHtml(data.error)}</span>`;
+            analyzeSVO(requirementText, card, () => {
+                currentIndex++;
+                setTimeout(analyzeNext, 1000); // Small delay between requests
+            });
         }
-        if (callback) callback();
-    })
-    .catch(error => {
-        cardElement.querySelector('.svo-result').innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
-        if (callback) callback();
-    });
-}
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-<?php endif; ?>
+        analyzeNext();
+    }
+
+    window.analyzeSVO = function(text, cardElement, callback) {
+        const formData = new FormData();
+        formData.append('text', text);
+
+        fetch('analyze.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const svoVisual = cardElement.querySelector('.svo-visual');
+                const svoResult = cardElement.querySelector('.svo-result');
+
+                svoVisual.innerHTML = `
+                    <div class="svo-box svo-subject">${escapeHtml(data.subject || 'N/A')}</div>
+                    <div class="svo-arrow">→</div>
+                    <div class="svo-box svo-verb">${escapeHtml(data.verb || 'N/A')}</div>
+                    <div class="svo-arrow">→</div>
+                    <div class="svo-box svo-object">${escapeHtml(data.object || 'N/A')}</div>
+                `;
+
+                svoResult.innerHTML = `
+                    <strong>SVO Analysis:</strong>
+                    Subject: <strong>${escapeHtml(data.subject || 'N/A')}</strong><br>
+                    Verb: <strong>${escapeHtml(data.verb || 'N/A')}</strong><br>
+                    Object: <strong>${escapeHtml(data.object || 'N/A')}</strong>
+                `;
+            } else {
+                cardElement.querySelector('.svo-result').innerHTML = `<span style="color: red;">Error: ${escapeHtml(data.error)}</span>`;
+            }
+            if (callback) callback();
+        })
+        .catch(error => {
+            cardElement.querySelector('.svo-result').innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+            if (callback) callback();
+        });
+    };
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+});
 </script>
 </body>
 </html>
