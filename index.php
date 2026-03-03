@@ -113,16 +113,19 @@ function parseTextSRS($text) {
 }
 
 // Process file upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
+// Process file upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Check upload error
+    if (!isset($_FILES['srsFile'])) {
+        die("No file uploaded.");
+    }
+
     if ($_FILES['srsFile']['error'] !== UPLOAD_ERR_OK) {
         die("Upload error code: " . $_FILES['srsFile']['error']);
     }
 
-    // Validate file existence
     if (!is_uploaded_file($_FILES['srsFile']['tmp_name'])) {
-        die("File upload failed. File not found in temp directory.");
+        die("File not uploaded properly.");
     }
 
     $file = $_FILES['srsFile']['tmp_name'];
@@ -133,8 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
     // Validate file type
     if (!in_array($ext, ['pdf', 'txt'])) {
         $errorMessage = 'Invalid file type. Please upload a PDF or TXT file.';
-    } elseif (!is_uploaded_file($file)) {
-        $errorMessage = 'File upload failed. Please try again.';
     } else {
         if ($ext === 'pdf') {
             $text = extractTextFromPDF($file);
