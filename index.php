@@ -1,10 +1,6 @@
 
 
 <?php
-
-echo "Max upload: " . ini_get('upload_max_filesize') . "<br>";
-echo "Post max size: " . ini_get('post_max_size') . "<br>";
-
 // Load Composer (needed for phpdotenv)
 require 'vendor/autoload.php';
 
@@ -118,9 +114,7 @@ function parseTextSRS($text) {
 
 // Process file upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
-    echo "<pre>";
-print_r($_FILES);
-echo "</pre>";
+ 
     
     $file = $_FILES['srsFile']['tmp_name'];
     $fileName = $_FILES['srsFile']['name'];
