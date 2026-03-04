@@ -66,13 +66,17 @@ function parseTextSRS($text) {
         $clean = preg_replace('/^[●•\-\*\s]+/', '', $clean);
         $clean = trim($clean);
 
-        // Match FR-XX or FR-XX.XX pattern (with optional parentheses description)
-        if (preg_match('/^FR[-_\s]?(\d{2}(?:\.\d{2})?)\s*(?:\([^)]*\))?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
-            $currentFR = 'FR-' . $m[1];
-            $currentNFR = '';
-            $frSections[$currentFR] = $m[2];
-            $structured[] = ['type' => 'fr', 'key' => $currentFR, 'text' => $m[2]];
-        }
+       // Match FR-XX, FR-XX.XX, or heading with (FR-XX)
+if (preg_match('/^(?:\d+(\.\d+)*)?\s*(?:.*)?\(?FR[-_\s]?(\d{2}(?:\.\d{2})?)\)?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
+    $currentFR = 'FR-' . $m[2];
+    $currentNFR = '';
+    $frSections[$currentFR] = $m[3];
+    $structured[] = [
+        'type' => 'fr',
+        'key' => $currentFR,
+        'text' => $m[3]
+    ];
+}
         // Match NFR-XX pattern (with optional parentheses description)
         elseif (preg_match('/^NFR[-_\s]?(\d{2})\s*(?:\([^)]*\))?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
             $currentNFR = 'NFR-' . $m[1];
