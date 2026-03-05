@@ -62,7 +62,7 @@ function parseTextSRS($text) {
         $clean = trim($line);
         if (empty($clean)) continue;
 
-  // Remove leading bullet points
+ // Remove leading bullet points
 $clean = preg_replace('/^[●•\-\*\s]+/', '', $clean);
 $clean = trim($clean);
 
@@ -81,6 +81,33 @@ if (preg_match('/\(?FR[-_\s]?(\d{2})\)?/i', $clean, $m)
         'text' => $clean
     ];
 }
+
+// Match sub-requirements like: FR-01.01:
+elseif (preg_match('/^FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
+
+    $currentFR = 'FR-' . $m[1];
+    $currentNFR = '';
+
+    $frSections[$currentFR] = $m[2];
+
+    $structured[] = [
+        'type' => 'fr',
+        'key'  => $currentFR,
+        'text' => $m[2]
+    ];
+}
+
+// Detect numbered sub-points like: 1. The system forwards...
+elseif ($currentFR && preg_match('/^\d+\.\s*(.*)/', $clean, $m)) {
+
+    $frSections[$currentFR] .= ' | ' . $m[1];
+
+    $structured[] = [
+        'type'   => 'fr-sub',
+        'parent' => $currentFR,
+        'text'   => $m[1]
+    ];
+} 
 
 // Match sub-requirements like: FR-01.01:
 elseif (preg_match('/^FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
