@@ -66,29 +66,48 @@ function parseTextSRS($text) {
         $clean = preg_replace('/^[●•\-\*\s]+/', '', $clean);
         $clean = trim($clean);
 
-       // Match FR-XX, FR-XX.XX, or heading with (FR-XX)
-if (preg_match('/^(?:\d+(\.\d+)*)?\s*(?:.*)?\(?FR[-_\s]?(\d{2}(?:\.\d{2})?)\)?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
-    $currentFR = 'FR-' . $m[2];
+// Match module headings like: 3.1.1 User Management Module (FR-01)
+if (preg_match('/\(?FR[-_\s]?(\d{2})\)?/i', $clean, $m) 
+    && !preg_match('/FR-\d{2}\.\d{2}/i', $clean)) {
+
+    $currentFR = 'FR-' . $m[1];
     $currentNFR = '';
-    $frSections[$currentFR] = $m[3];
+
+    $frSections[$currentFR] = $clean;
+
     $structured[] = [
-        'type' => 'fr',
-        'key' => $currentFR,
-        'text' => $m[3]
+        'type' => 'fr-module',
+        'key'  => $currentFR,
+        'text' => $clean
     ];
 }
-        // Match NFR-XX pattern (with optional parentheses description)
-        elseif (preg_match('/^NFR[-_\s]?(\d{2})\s*(?:\([^)]*\))?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
-            $currentNFR = 'NFR-' . $m[1];
-            $currentFR = '';
-            $nfrSections[$currentNFR] = $m[2];
-            $structured[] = ['type' => 'nfr', 'key' => $currentNFR, 'text' => $m[2]];
-        }
-        // Match sub-requirements (bullet points)
-        elseif ($currentFR && preg_match('/^\s*[-●•*]\s*(.*)/', $clean, $m)) {
-            $frSections[$currentFR] .= ' | ' . $m[1];
-            $structured[] = ['type' => 'fr-sub', 'parent' => $currentFR, 'text' => $m[1]];
-        }
+
+// Match sub-requirements like: FR-01.01:
+elseif (preg_match('/^FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
+
+    $currentFR = 'FR-' . $m[1];
+    $currentNFR = '';
+
+    $frSections[$currentFR] = $m[2];
+
+    $structured[] = [
+        'type' => 'fr',
+        'key'  => $currentFR,
+        'text' => $m[2]
+    ];
+}
+
+// Detect numbered sub-points like: 1. The system forwards...
+elseif ($currentFR && preg_match('/^\d+\.\s*(.*)/', $clean, $m)) {
+
+    $frSections[$currentFR] .= ' | ' . $m[1];
+
+    $structured[] = [
+        'type'   => 'fr-sub',
+        'parent' => $currentFR,
+        'text'   => $m[1]
+    ];
+}
         // Continuation lines
         elseif (!empty($currentFR) || !empty($currentNFR)) {
             if (!empty($currentFR)) {
