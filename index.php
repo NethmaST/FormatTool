@@ -62,128 +62,76 @@ function parseTextSRS($text) {
         $clean = trim($line);
         if (empty($clean)) continue;
 
- // Remove leading bullet points
-$clean = preg_replace('/^[●•\-\*\s]+/', '', $clean);
-$clean = trim($clean);
+        // remove bullets
+        $clean = preg_replace('/^[●•\-\*\s]+/', '', $clean);
+        $clean = trim($clean);
 
-// Match module headings like: 3.1.1 User Management Module (FR-01)
-if (preg_match('/\(?FR[-_\s]?(\d{2})\)?/i', $clean, $m) 
-    && !preg_match('/FR-\d{2}\.\d{2}/i', $clean)) {
+        // ===== FUNCTIONAL REQUIREMENT MODULE =====
+        if (preg_match('/\bFR[-_\s]?(\d{2})\b/i', $clean, $m)) {
+            $currentFR = 'FR-' . $m[1];
+            $currentNFR = '';
 
-    $currentFR = 'FR-' . $m[1];
-    $currentNFR = '';
+            $frSections[$currentFR] = $clean;
 
-    $frSections[$currentFR] = $clean;
-
-    $structured[] = [
-        'type' => 'fr-module',
-        'key'  => $currentFR,
-        'text' => $clean
-    ];
-}
-
-// Match sub-requirements like: FR-01.01:
-elseif (preg_match('/^FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
-
-    $currentFR = 'FR-' . $m[1];
-    $currentNFR = '';
-
-    $frSections[$currentFR] = $m[2];
-
-    $structured[] = [
-        'type' => 'fr',
-        'key'  => $currentFR,
-        'text' => $m[2]
-    ];
-}
-
-// Detect numbered sub-points like: 1. The system forwards...
-elseif ($currentFR && preg_match('/^\d+\.\s*(.*)/', $clean, $m)) {
-
-    $frSections[$currentFR] .= ' | ' . $m[1];
-
-    $structured[] = [
-        'type'   => 'fr-sub',
-        'parent' => $currentFR,
-        'text'   => $m[1]
-    ];
-} 
-
-// Match sub-requirements like: FR-01.01:
-elseif (preg_match('/^FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
-
-    $currentFR = 'FR-' . $m[1];
-    $currentNFR = '';
-
-    $frSections[$currentFR] = $m[2];
-
-    $structured[] = [
-        'type' => 'fr',
-        'key'  => $currentFR,
-        'text' => $m[2]
-    ];
-}
-
-// Detect numbered sub-points like: 1. The system forwards...
-elseif ($currentFR && preg_match('/^\d+\.\s*(.*)/', $clean, $m)) {
-
-    $frSections[$currentFR] .= ' | ' . $m[1];
-
-    $structured[] = [
-        'type'   => 'fr-sub',
-        'parent' => $currentFR,
-        'text'   => $m[1]
-    ];
-}    
-
-// Match sub-requirements like: FR-01.01:
-elseif (preg_match('/^FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
-
-    $currentFR = 'FR-' . $m[1];
-    $currentNFR = '';
-
-    $frSections[$currentFR] = $m[2];
-
-    $structured[] = [
-        'type' => 'fr',
-        'key'  => $currentFR,
-        'text' => $m[2]
-    ];
-}
-
-// Detect numbered sub-points like: 1. The system forwards...
-elseif ($currentFR && preg_match('/^\d+\.\s*(.*)/', $clean, $m)) {
-
-    $frSections[$currentFR] .= ' | ' . $m[1];
-
-    $structured[] = [
-        'type'   => 'fr-sub',
-        'parent' => $currentFR,
-        'text'   => $m[1]
-    ];
-}
-        // Continuation lines
-        elseif (!empty($currentFR) || !empty($currentNFR)) {
-            if (!empty($currentFR)) {
-                $frSections[$currentFR] .= ' ' . $clean;
-                for ($i = count($structured) - 1; $i >= 0; $i--) {
-                    if ($structured[$i]['type'] == 'fr' && $structured[$i]['key'] == $currentFR) {
-                        $structured[$i]['text'] .= ' ' . $clean;
-                        break;
-                    }
-                }
-            } else {
-                $nfrSections[$currentNFR] .= ' ' . $clean;
-                for ($i = count($structured) - 1; $i >= 0; $i--) {
-                    if ($structured[$i]['type'] == 'nfr' && $structured[$i]['key'] == $currentNFR) {
-                        $structured[$i]['text'] .= ' ' . $clean;
-                        break;
-                    }
-                }
-            }
-        } else {
-            $structured[] = ['type' => 'text', 'text' => $clean];
+            $structured[] = [
+                'type' => 'fr-module',
+                'key'  => $currentFR,
+                'text' => $clean
+            ];
+            continue;
         }
+
+        // ===== FUNCTIONAL SUB REQUIREMENT =====
+        if (preg_match('/^FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
+            $currentFR = 'FR-' . $m[1];
+            $currentNFR = '';
+
+            $frSections[$currentFR] = $m[2];
+
+            $structured[] = [
+                'type' => 'fr',
+                'key'  => $currentFR,
+                'text' => $m[2]
+            ];
+            continue;
+        }
+
+        // ===== NUMBERED SUB POINT (functional) =====
+        if ($currentFR && preg_match('/^\d+\.\s*(.*)/', $clean, $m)) {
+            $sub = $m[1];
+
+            if (preg_match('/\bshall\b|\bshould\b|\bmust\b/i', $sub)) {
+                $frSections[$currentFR] .= ' | ' . $sub;
+                $structured[] = ['type' => 'fr-sub', 'parent' => $currentFR, 'text' => $sub];
+            } else {
+                $structured[] = ['type' => 'fr-info', 'parent' => $currentFR, 'text' => $sub];
+            }
+            continue;
+        }
+
+        // ===== NON FUNCTIONAL REQUIREMENT =====
+        if (preg_match('/\bNFR[-_\s]?(\d{2})\b/i', $clean, $m)) {
+            $currentNFR = 'NFR-' . $m[1];
+            $currentFR = '';
+
+            $nfrSections[$currentNFR] = $clean;
+
+            $structured[] = [
+                'type' => 'nfr',
+                'key'  => $currentNFR,
+                'text' => $clean
+            ];
+            continue;
+        }
+
+        // ===== CONTINUATION LINES =====
+        if ($currentFR) {
+            $frSections[$currentFR] .= ' ' . $clean;
+        } elseif ($currentNFR) {
+            $nfrSections[$currentNFR] .= ' ' . $clean;
+        }
+
+        $structured[] = ['type' => 'text', 'text' => $clean];
     }
 
     return ['FR' => $frSections, 'NFR' => $nfrSections, 'STRUCTURED' => $structured];
