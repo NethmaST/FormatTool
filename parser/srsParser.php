@@ -43,7 +43,7 @@ function parseTextSRS($text) {
                 'number' => $sectionNumber,
                 'title' => $sectionTitle,
                 'description' => $sectionDesc,
-                'hierarchy' => array_values(array_filter($sectionHierarchy, function($v, $k) {
+                'hierarchy' => array_values(array_filter($sectionHierarchy, function($v, $k) use ($level) {
                     return $k <= $level;
                 }, ARRAY_FILTER_USE_BOTH))
             ];
