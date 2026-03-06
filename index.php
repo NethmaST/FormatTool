@@ -51,40 +51,60 @@ function extractTextFromPDF($filePath) {
  * Identifies FR (Functional) and NFR (Non-Functional) requirements
  */
 function parseTextSRS($text) {
+
     $lines = preg_split('/\r?\n/', $text);
+
     $frSections = [];
     $nfrSections = [];
     $structured = [];
-    $currentFR = '';
-    $currentNFR = '';
+
+    $currentFR = null;
+    $currentNFR = null;
 
     foreach ($lines as $line) {
+
         $clean = trim($line);
-        if (empty($clean)) continue;
+        if ($clean === '') continue;
 
         // remove bullets
         $clean = preg_replace('/^[●•\-\*\s]+/', '', $clean);
         $clean = trim($clean);
 
-        // ===== FUNCTIONAL REQUIREMENT MODULE =====
-        if (preg_match('/\bFR[-_\s]?(\d{2})\b/i', $clean, $m)) {
-            $currentFR = 'FR-' . $m[1];
-            $currentNFR = '';
 
-            $frSections[$currentFR] = $clean;
+        /* =========================
+           FR MODULE DETECTION
+           Example:
+           User Management Module (FR-01)
+        ========================== */
+
+        if (preg_match('/\(FR[-_\s]?(\d{2})\)/i', $clean, $m)) {
+
+            $currentFR = "FR-" . $m[1];
+            $currentNFR = null;
+
+            $frSections[$currentFR] = '';
 
             $structured[] = [
                 'type' => 'fr-module',
                 'key'  => $currentFR,
                 'text' => $clean
             ];
+
             continue;
         }
 
-        // ===== FUNCTIONAL SUB REQUIREMENT =====
-        if (preg_match('/^FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
-            $currentFR = 'FR-' . $m[1];
-            $currentNFR = '';
+
+
+        /* =========================
+           FR REQUIREMENT
+           Example:
+           FR-01.01: text
+        ========================== */
+
+        if (preg_match('/FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
+
+            $currentFR = "FR-" . $m[1];
+            $currentNFR = null;
 
             $frSections[$currentFR] = $m[2];
 
@@ -93,48 +113,71 @@ function parseTextSRS($text) {
                 'key'  => $currentFR,
                 'text' => $m[2]
             ];
+
             continue;
         }
 
-        // ===== NUMBERED SUB POINT (functional) =====
-        if ($currentFR && preg_match('/^\d+\.\s*(.*)/', $clean, $m)) {
-            $sub = $m[1];
 
-            if (preg_match('/\bshall\b|\bshould\b|\bmust\b/i', $sub)) {
-                $frSections[$currentFR] .= ' | ' . $sub;
-                $structured[] = ['type' => 'fr-sub', 'parent' => $currentFR, 'text' => $sub];
-            } else {
-                $structured[] = ['type' => 'fr-info', 'parent' => $currentFR, 'text' => $sub];
-            }
-            continue;
-        }
 
-        // ===== NON FUNCTIONAL REQUIREMENT =====
-        if (preg_match('/\bNFR[-_\s]?(\d{2})\b/i', $clean, $m)) {
-            $currentNFR = 'NFR-' . $m[1];
-            $currentFR = '';
+        /* =========================
+           NFR DETECTION
+        ========================== */
 
-            $nfrSections[$currentNFR] = $clean;
+        if (preg_match('/\(NFR[-_\s]?(\d{2})\)/i', $clean, $m)) {
+
+            $currentNFR = "NFR-" . $m[1];
+            $currentFR = null;
+
+            $nfrSections[$currentNFR] = '';
 
             $structured[] = [
-                'type' => 'nfr',
+                'type' => 'nfr-module',
                 'key'  => $currentNFR,
                 'text' => $clean
             ];
+
             continue;
         }
 
-        // ===== CONTINUATION LINES =====
+
+
+        /* =========================
+           CONTINUATION LINES
+        ========================== */
+
         if ($currentFR) {
-            $frSections[$currentFR] .= ' ' . $clean;
-        } elseif ($currentNFR) {
-            $nfrSections[$currentNFR] .= ' ' . $clean;
+
+            $frSections[$currentFR] .= " " . $clean;
+
+            $structured[] = [
+                'type' => 'fr-text',
+                'parent' => $currentFR,
+                'text' => $clean
+            ];
+
+            continue;
         }
 
-        $structured[] = ['type' => 'text', 'text' => $clean];
+        if ($currentNFR) {
+
+            $nfrSections[$currentNFR] .= " " . $clean;
+
+            $structured[] = [
+                'type' => 'nfr-text',
+                'parent' => $currentNFR,
+                'text' => $clean
+            ];
+
+            continue;
+        }
+
     }
 
-    return ['FR' => $frSections, 'NFR' => $nfrSections, 'STRUCTURED' => $structured];
+    return [
+        'FR' => $frSections,
+        'NFR' => $nfrSections,
+        'STRUCTURED' => $structured
+    ];
 }
 
 
