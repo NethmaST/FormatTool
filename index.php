@@ -4,6 +4,9 @@
 // Load Composer (needed for phpdotenv)
 require 'vendor/autoload.php';
 
+//load parser
+require 'parser/srsParser.php';
+
 // Load .env file
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
@@ -50,135 +53,7 @@ function extractTextFromPDF($filePath) {
  * Parse SRS document text into structured requirements
  * Identifies FR (Functional) and NFR (Non-Functional) requirements
  */
-function parseTextSRS($text) {
 
-    $lines = preg_split('/\r?\n/', $text);
-
-    $frSections = [];
-    $nfrSections = [];
-    $structured = [];
-
-    $currentFR = null;
-    $currentNFR = null;
-
-    foreach ($lines as $line) {
-
-        $clean = trim($line);
-        if ($clean === '') continue;
-
-        // remove bullets
-        $clean = preg_replace('/^[●•\-\*\s]+/', '', $clean);
-        $clean = trim($clean);
-
-
-        /* =========================
-           FR MODULE DETECTION
-           Example:
-           User Management Module (FR-01)
-        ========================== */
-
-        if (preg_match('/\(FR[-_\s]?(\d{2})\)/i', $clean, $m)) {
-
-            $currentFR = "FR-" . $m[1];
-            $currentNFR = null;
-
-            $frSections[$currentFR] = '';
-
-            $structured[] = [
-                'type' => 'fr-module',
-                'key'  => $currentFR,
-                'text' => $clean
-            ];
-
-            continue;
-        }
-
-
-
-        /* =========================
-           FR REQUIREMENT
-           Example:
-           FR-01.01: text
-        ========================== */
-
-        if (preg_match('/FR[-_\s]?(\d{2}\.\d{2})\s*[:\-]\s*(.*)/i', $clean, $m)) {
-
-            $currentFR = "FR-" . $m[1];
-            $currentNFR = null;
-
-            $frSections[$currentFR] = $m[2];
-
-            $structured[] = [
-                'type' => 'fr',
-                'key'  => $currentFR,
-                'text' => $m[2]
-            ];
-
-            continue;
-        }
-
-
-
-        /* =========================
-           NFR DETECTION
-        ========================== */
-
-        if (preg_match('/\(NFR[-_\s]?(\d{2})\)/i', $clean, $m)) {
-
-            $currentNFR = "NFR-" . $m[1];
-            $currentFR = null;
-
-            $nfrSections[$currentNFR] = '';
-
-            $structured[] = [
-                'type' => 'nfr-module',
-                'key'  => $currentNFR,
-                'text' => $clean
-            ];
-
-            continue;
-        }
-
-
-
-        /* =========================
-           CONTINUATION LINES
-        ========================== */
-
-        if ($currentFR) {
-
-            $frSections[$currentFR] .= " " . $clean;
-
-            $structured[] = [
-                'type' => 'fr-text',
-                'parent' => $currentFR,
-                'text' => $clean
-            ];
-
-            continue;
-        }
-
-        if ($currentNFR) {
-
-            $nfrSections[$currentNFR] .= " " . $clean;
-
-            $structured[] = [
-                'type' => 'nfr-text',
-                'parent' => $currentNFR,
-                'text' => $clean
-            ];
-
-            continue;
-        }
-
-    }
-
-    return [
-        'FR' => $frSections,
-        'NFR' => $nfrSections,
-        'STRUCTURED' => $structured
-    ];
-}
 
 
 // Process file upload
