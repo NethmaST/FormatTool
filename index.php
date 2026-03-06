@@ -795,12 +795,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                     <div class="stat-icon nfr"><i class="fas fa-shield-halved"></i></div>
                     <div class="stat-content">
                         <h3>Non-Functional Requirements</h3>
-                        <p><?php echo count($parsed['NFR']); ?></p>
+                        <p><<?php echo isset($parsed['NFR']) ? count($parsed['NFR']) : 0; ?></p>
                     </div>
                 </div>
             </div>
         </div>
-
+        
         <div id="full" class="view-section">
             <?php if (empty($parsed['STRUCTURED'])): ?>
                 <div class="empty-state">
