@@ -5,7 +5,7 @@
 require 'vendor/autoload.php';
 
 //load parser
-require 'parser/srsParser.php';
+require __DIR__ . '/parser/srsParser.php';
 
 // Load .env file
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
