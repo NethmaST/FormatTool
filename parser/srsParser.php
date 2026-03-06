@@ -34,9 +34,10 @@ function parseTextSRS($text) {
         $structured[] = ['type' => 'text', 'text' => $clean];
     }
 
-    return [
-        'FR' => $frSections,
-        'STRUCTURED' => $structured
-    ];
+   return [
+    'FR' => $frSections,
+    'NFR' => [],
+    'STRUCTURED' => $structured
+];
 }
 ?>
