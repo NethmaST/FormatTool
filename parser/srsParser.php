@@ -1,100 +1,147 @@
 <?php
 
 function parseTextSRS($text) {
+
     $lines = preg_split('/\r?\n/', $text);
+
     $frSections = [];
+    $nfrSections = [];
     $structured = [];
+
     $currentFR = '';
     $currentSection = '';
-    $sectionHierarchy = [];
 
     foreach ($lines as $line) {
+
         $clean = trim($line);
-        if (empty($clean)) continue;
+        if ($clean === '') continue;
 
-        // Remove bullet points from the beginning
-        $cleanWithoutBullet = preg_replace('/^[●•\-\*\s]+/', '', $clean);
-        $cleanWithoutBullet = trim($cleanWithoutBullet);
+        // remove bullets
+        $clean = preg_replace('/^[●•\-\*\s]+/', '', $clean);
+        $clean = trim($clean);
 
-        // Pattern 1: Numbered section headers (e.g., "3. Functional Requirements", "3.1 Phase 1:", "3.1.1 User Management Module (FR-01)")
-        // Matches: number, title (with optional FR code), and optional description after : or -
-        if (preg_match('/^(\d+(?:\.\d+)*)\s+(.+?)(?:\s*\([A-Z]+-\d+(?:\.\d+)?\))?\s*(?:[:\-]\s*(.*))?$/i', $cleanWithoutBullet, $m)) {
+        /*
+        ============================
+        1. SECTION HEADERS
+        Example:
+        3 Functional Requirements
+        3.1 Phase 1
+        3.1.1 User Management Module
+        ============================
+        */
+
+        if (preg_match('/^(\d+(\.\d+)*)\s+(.*)$/', $clean, $m)) {
+
             $sectionNumber = $m[1];
-            // Extract title without the FR code in parentheses
-            $titleWithFR = trim($m[2]);
-            // Remove any trailing FR code if present
-            $sectionTitle = preg_replace('/\s*\([A-Z]+-\d+(?:\.\d+)?\)\s*$/i', '', $titleWithFR);
-            $sectionTitle = trim($sectionTitle);
-            $sectionDesc = trim($m[3] ?? '');
-            
-            // Determine section level based on number of dots
-            $level = substr_count($sectionNumber, '.') + 1;
-            
-            // This is a section header
-            $sectionHierarchy[$level] = [
-                'number' => $sectionNumber,
-                'title' => $sectionTitle,
-                'description' => $sectionDesc,
-                'level' => $level
-            ];
-            
-            $currentSection = $sectionNumber . ' ' . $sectionTitle;
-            $currentFR = '';
-            
-            // Add to structured output
+            $sectionTitle  = trim($m[3]);
+
+            $currentSection = $sectionNumber . " " . $sectionTitle;
+
             $structured[] = [
                 'type' => 'section',
-                'level' => $level,
                 'number' => $sectionNumber,
                 'title' => $sectionTitle,
-                'description' => $sectionDesc,
-                'hierarchy' => array_values(array_filter($sectionHierarchy, function($v, $k) use ($level) {
-                    return $k <= $level;
-                }, ARRAY_FILTER_USE_BOTH))
+                'text' => $sectionTitle
             ];
+
             continue;
         }
 
-        // Pattern 2: FR items (e.g., "FR-01.01: Description")
-        if (preg_match('/^(FR-\d+\.\d+)\s*[:\-]\s*(.*)/i', $cleanWithoutBullet, $m)) {
-            $currentFR = $m[1];
-            $frText = $m[2];
-            
-            $frSections[$currentFR] = $frText;
+        /*
+        ============================
+        2. FUNCTIONAL REQUIREMENTS
+        Supports:
+        FR-01
+        FR-01:
+        FR-01.01
+        FR-01.01:
+        ============================
+        */
+
+        if (preg_match('/^(FR-\d+(?:\.\d+)*)\s*[:\-]?\s*(.*)/i', $clean, $m)) {
+
+            $key = strtoupper($m[1]);
+            $textFR = trim($m[2]);
+
+            if ($textFR == '') {
+                $textFR = $clean;
+            }
+
+            $currentFR = $key;
+
+            $frSections[$key] = $textFR;
+
             $structured[] = [
                 'type' => 'fr',
-                'key' => $currentFR,
-                'text' => $frText,
+                'key' => $key,
+                'text' => $textFR,
                 'section' => $currentSection
             ];
+
             continue;
         }
 
-        // Pattern 3: Continue text for current FR or add to section
-        if ($currentFR) {
-            $frSections[$currentFR] .= ' ' . $cleanWithoutBullet;
+        /*
+        ============================
+        3. NFR DETECTION (simple)
+        ============================
+        */
+
+        if (stripos($clean, 'shall') !== false &&
+            (stripos($clean, 'performance') !== false ||
+             stripos($clean, 'security') !== false ||
+             stripos($clean, 'availability') !== false ||
+             stripos($clean, 'usability') !== false)) {
+
+            $nfrKey = "NFR-" . (count($nfrSections) + 1);
+
+            $nfrSections[$nfrKey] = $clean;
+
+            $structured[] = [
+                'type' => 'nfr',
+                'key' => $nfrKey,
+                'text' => $clean,
+                'section' => $currentSection
+            ];
+
+            continue;
+        }
+
+        /*
+        ============================
+        4. CONTINUATION OF FR
+        ============================
+        */
+
+        if ($currentFR != '') {
+
+            $frSections[$currentFR] .= " " . $clean;
+
             $structured[] = [
                 'type' => 'fr_continuation',
                 'key' => $currentFR,
-                'text' => $cleanWithoutBullet
+                'text' => $clean
             ];
+
             continue;
         }
 
-        // Pattern 4: Regular text (description, notes, etc.)
-        if (!empty($cleanWithoutBullet)) {
-            $structured[] = [
-                'type' => 'text',
-                'text' => $cleanWithoutBullet,
-                'section' => $currentSection
-            ];
-        }
+        /*
+        ============================
+        5. NORMAL TEXT
+        ============================
+        */
+
+        $structured[] = [
+            'type' => 'text',
+            'text' => $clean,
+            'section' => $currentSection
+        ];
     }
 
     return [
         'FR' => $frSections,
-        'NFR' => [],
+        'NFR' => $nfrSections,
         'STRUCTURED' => $structured
     ];
 }
-?>

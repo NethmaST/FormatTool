@@ -795,8 +795,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                     <div class="stat-icon nfr"><i class="fas fa-shield-halved"></i></div>
                     <div class="stat-content">
                         <h3>Non-Functional Requirements</h3>
-                        <p><<?php echo isset($parsed['NFR']) ? count($parsed['NFR']) : 0; ?></p>
-                    </div>
+<p><?php echo isset($parsed['NFR']) ? count($parsed['NFR']) : 0; ?></p>                  
+  </div>
                 </div>
             </div>
         </div>
@@ -808,8 +808,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                     <p>No requirements found in the document</p>
                 </div>
             <?php else: ?>
-                <?php foreach ($parsed['STRUCTURED'] as $item): ?>
-    <?php if ($item['type'] == 'fr'): ?>
+<?php foreach ($parsed['STRUCTURED'] ?? [] as $item): ?>   
+     <?php if ($item['type'] == 'fr'): ?>
         <div class="card fr-type">
         <div class="card-header">
         <span class="badge badge-fr"><i class="fas fa-code"></i> Functional</span>
