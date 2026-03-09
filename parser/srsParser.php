@@ -8,8 +8,9 @@ function parseTextSRS($text) {
     $nfrSections = [];
     $structured = [];
 
-    $currentFR = '';
-    $currentSection = '';
+   $currentFR = '';
+$currentNFR = '';
+$currentSection = '';
 
     foreach ($lines as $line) {
 
@@ -87,12 +88,11 @@ if (preg_match('/\(?(FR-\d+(?:\.\d+)*)\)?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
     continue;
 }
 
-       /*
+/*
 ============================
 3. NON-FUNCTIONAL REQUIREMENTS
 Supports:
 NFR-01
-NFR-01:
 NFR-01 (Security):
 ============================
 */
@@ -100,29 +100,50 @@ NFR-01 (Security):
 if (preg_match('/^(NFR-\d+)\s*(\([^)]+\))?\s*:\s*(.+)$/i', $clean, $m)) {
 
     $key = strtoupper($m[1]);
-
     $title = isset($m[2]) ? trim($m[2]) : '';
-
-    $textNFR = trim($m[3]);
+    $text = trim($m[3]);
 
     if ($title) {
-        $textNFR = $title . " " . $textNFR;
+        $text = $title . " " . $text;
     }
 
+    $currentNFR = $key;
     $currentFR = ''; // stop FR continuation
 
-    $nfrSections[$key] = $textNFR;
+    $nfrSections[$key] = $text;
 
     $structured[] = [
         'type' => 'nfr',
         'key' => $key,
-        'text' => $textNFR,
+        'text' => $text,
         'section' => $currentSection
     ];
 
     continue;
+} 
+
+/*
+============================
+NFR CONTINUATION
+============================
+*/
+
+if ($currentNFR != '' && !preg_match('/^(NFR-\d+)/i', $clean)) {
+
+    $nfrSections[$currentNFR] .= " " . $clean;
+
+    $structured[] = [
+        'type' => 'nfr_continuation',
+        'key' => $currentNFR,
+        'text' => $clean
+    ];
+
+    continue;
 }
-      
+
+
+
+
 
         /*
         ============================
