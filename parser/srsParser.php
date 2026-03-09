@@ -16,10 +16,15 @@ function parseTextSRS($text) {
         $cleanWithoutBullet = preg_replace('/^[●•\-\*\s]+/', '', $clean);
         $cleanWithoutBullet = trim($cleanWithoutBullet);
 
-        // Pattern 1: Numbered section headers (e.g., "3. Functional Requirements", "3.1 Phase 1:", "3.1.1 User Management Module")
-        if (preg_match('/^(\d+(?:\.\d+)*)\s+([A-Z][^:]*?)(?:\s*[:\-]\s*(.*))?$/i', $cleanWithoutBullet, $m)) {
+        // Pattern 1: Numbered section headers (e.g., "3. Functional Requirements", "3.1 Phase 1:", "3.1.1 User Management Module (FR-01)")
+        // Matches: number, title (with optional FR code), and optional description after : or -
+        if (preg_match('/^(\d+(?:\.\d+)*)\s+(.+?)(?:\s*\([A-Z]+-\d+(?:\.\d+)?\))?\s*(?:[:\-]\s*(.*))?$/i', $cleanWithoutBullet, $m)) {
             $sectionNumber = $m[1];
-            $sectionTitle = trim($m[2]);
+            // Extract title without the FR code in parentheses
+            $titleWithFR = trim($m[2]);
+            // Remove any trailing FR code if present
+            $sectionTitle = preg_replace('/\s*\([A-Z]+-\d+(?:\.\d+)?\)\s*$/i', '', $titleWithFR);
+            $sectionTitle = trim($sectionTitle);
             $sectionDesc = trim($m[3] ?? '');
             
             // Determine section level based on number of dots
