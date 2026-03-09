@@ -47,39 +47,39 @@ function parseTextSRS($text) {
             continue;
         }
 
-        /*
-        ============================
-        2. FUNCTIONAL REQUIREMENTS
-        Supports:
-        FR-01
-        FR-01:
-        FR-01.01
-        FR-01.01:
-        ============================
-        */
+       /*
+============================
+2. FUNCTIONAL REQUIREMENTS
+Supports:
+FR-01
+FR-01:
+FR-01.01
+FR-01.01:
+============================
+*/
 
-        if (preg_match('/^(FR-\d+(?:\.\d+)*)\s*[:\-]?\s*(.*)/i', $clean, $m)) {
+if (preg_match('/^(FR-\d+(?:\.\d+)*)\s*[:\-]?\s*(.*)/i', $clean, $m)) {
 
-            $key = strtoupper($m[1]);
-            $textFR = trim($m[2]);
+    $key = strtoupper($m[1]);
+    $textFR = trim($m[2]);
 
-            if ($textFR == '') {
-                $textFR = $clean;
-            }
+    if ($textFR == '') {
+        $textFR = $clean;
+    }
 
-            $currentFR = $key;
+    $currentFR = $key;
 
-            $frSections[$key] = $textFR;
+    $frSections[$key] = $textFR;
 
-            $structured[] = [
-                'type' => 'fr',
-                'key' => $key,
-                'text' => $textFR,
-                'section' => $currentSection
-            ];
+    $structured[] = [
+        'type' => 'fr',
+        'key' => $key,
+        'text' => $textFR,
+        'section' => $currentSection
+    ];
 
-            continue;
-        }
+    continue;
+}
 
         /*
         ============================
