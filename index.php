@@ -742,6 +742,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
         <button class="nav-btn" data-view="nfr"><i class="fas fa-shield-halved"></i> Non-Functional (NFR)</button>
         <button class="nav-btn" data-view="clean"><i class="fas fa-list"></i> Clean Requirements</button>
 
+      <h3>Resources</h3>
+<a href="templates/SRS_Template.docx" download class="nav-btn">
+    <i class="fas fa-download"></i> Download SRS Template
+</a>  
         <div class="sidebar-footer">
             <a href="?"><i class="fas fa-arrow-left"></i> Upload New File</a>
         </div>
