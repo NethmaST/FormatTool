@@ -88,30 +88,38 @@ if (preg_match('/\(?(FR-\d+(?:\.\d+)*)\)?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
 }
 
         /*
-        ============================
-        3. NFR DETECTION (simple)
-        ============================
-        */
+============================
+3. NON-FUNCTIONAL REQUIREMENTS
+Supports:
+NFR-01
+NFR-01:
+NFR-01 (Security)
+============================
+*/
 
-        if (stripos($clean, 'shall') !== false &&
-            (stripos($clean, 'performance') !== false ||
-             stripos($clean, 'security') !== false ||
-             stripos($clean, 'availability') !== false ||
-             stripos($clean, 'usability') !== false)) {
+if (preg_match('/^(NFR-\d+)\s*(?:\([^)]+\))?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
 
-            $nfrKey = "NFR-" . (count($nfrSections) + 1);
+    $key = strtoupper($m[1]);
+    $textNFR = trim($m[2]);
 
-            $nfrSections[$nfrKey] = $clean;
+    if ($textNFR == '') {
+        $textNFR = $clean;
+    }
 
-            $structured[] = [
-                'type' => 'nfr',
-                'key' => $nfrKey,
-                'text' => $clean,
-                'section' => $currentSection
-            ];
+    $currentFR = ''; // stop FR continuation
 
-            continue;
-        }
+    $nfrSections[$key] = $textNFR;
+
+    $structured[] = [
+        'type' => 'nfr',
+        'key' => $key,
+        'text' => $textNFR,
+        'section' => $currentSection
+    ];
+
+    continue;
+}
+      
 
         /*
         ============================
@@ -131,6 +139,24 @@ if (preg_match('/\(?(FR-\d+(?:\.\d+)*)\)?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
 
     continue;
 }
+
+if (!empty($nfrSections)) {
+    $lastNFR = array_key_last($nfrSections);
+
+    if ($lastNFR && !preg_match('/^(NFR-\d+)/i', $clean)) {
+
+        $nfrSections[$lastNFR] .= " " . $clean;
+
+        $structured[] = [
+            'type' => 'nfr_continuation',
+            'key' => $lastNFR,
+            'text' => $clean
+        ];
+
+        continue;
+    }
+}
+
 
         /*
         ============================
