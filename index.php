@@ -782,8 +782,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['srsFile'])) {
                     <div class="stat-icon fr"><i class="fas fa-code"></i></div>
                     <div class="stat-content">
                         <h3>Functional Requirements</h3>
-                        <p><?php echo count($parsed['FR']); ?></p>
-                    </div>
+<p><?php echo isset($parsed['FR']) ? count($parsed['FR']) : 0; ?></p>                 
+   </div>
                     <div id="progressContainer" style="margin-top: 15px; display:none;">
     <div style="background: #e5e7eb; border-radius: 10px; overflow: hidden;">
         <div id="progressBar" style="width: 0%; height: 10px; background: linear-gradient(135deg, #2563eb, #1d4ed8); transition: width 0.3s ease;"></div>

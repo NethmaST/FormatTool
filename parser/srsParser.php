@@ -55,21 +55,27 @@ FR-01
 FR-01:
 FR-01.01
 FR-01.01:
+FR inside brackets (FR-01)
 ============================
 */
 
-if (preg_match('/^(FR-\d+(?:\.\d+)*)\s*[:\-]?\s*(.*)/i', $clean, $m)) {
+if (preg_match('/\(?(FR-\d+(?:\.\d+)*)\)?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
 
     $key = strtoupper($m[1]);
     $textFR = trim($m[2]);
 
+    // If text is empty, use next lines
     if ($textFR == '') {
         $textFR = $clean;
     }
 
     $currentFR = $key;
 
-    $frSections[$key] = $textFR;
+    if (!isset($frSections[$key])) {
+        $frSections[$key] = $textFR;
+    } else {
+        $frSections[$key] .= " " . $textFR;
+    }
 
     $structured[] = [
         'type' => 'fr',
@@ -113,18 +119,18 @@ if (preg_match('/^(FR-\d+(?:\.\d+)*)\s*[:\-]?\s*(.*)/i', $clean, $m)) {
         ============================
         */
 
-        if ($currentFR != '') {
+    if ($currentFR != '' && !preg_match('/^(FR-\d+)/i', $clean)) {
 
-            $frSections[$currentFR] .= " " . $clean;
+    $frSections[$currentFR] .= " " . $clean;
 
-            $structured[] = [
-                'type' => 'fr_continuation',
-                'key' => $currentFR,
-                'text' => $clean
-            ];
+    $structured[] = [
+        'type' => 'fr_continuation',
+        'key' => $currentFR,
+        'text' => $clean
+    ];
 
-            continue;
-        }
+    continue;
+}
 
         /*
         ============================
