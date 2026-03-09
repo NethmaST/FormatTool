@@ -87,23 +87,26 @@ if (preg_match('/\(?(FR-\d+(?:\.\d+)*)\)?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
     continue;
 }
 
-        /*
+       /*
 ============================
 3. NON-FUNCTIONAL REQUIREMENTS
 Supports:
 NFR-01
 NFR-01:
-NFR-01 (Security)
+NFR-01 (Security):
 ============================
 */
 
-if (preg_match('/^(NFR-\d+)\s*(?:\([^)]+\))?\s*[:\-]?\s*(.*)/i', $clean, $m)) {
+if (preg_match('/^(NFR-\d+)\s*(\([^)]+\))?\s*:\s*(.+)$/i', $clean, $m)) {
 
     $key = strtoupper($m[1]);
-    $textNFR = trim($m[2]);
 
-    if ($textNFR == '') {
-        $textNFR = $clean;
+    $title = isset($m[2]) ? trim($m[2]) : '';
+
+    $textNFR = trim($m[3]);
+
+    if ($title) {
+        $textNFR = $title . " " . $textNFR;
     }
 
     $currentFR = ''; // stop FR continuation
