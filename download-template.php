@@ -1,5 +1,5 @@
 <?php
-// Path to your template file
+// Correct path relative to this PHP file
 $file = __DIR__ . '/templates/SRS_Template.docx';
 
 if (file_exists($file)) {
@@ -13,6 +13,6 @@ if (file_exists($file)) {
     readfile($file);
     exit;
 } else {
-    echo "Template file not found!";
+    echo "Template file not found! Path: $file";
 }
 ?>
