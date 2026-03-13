@@ -14,7 +14,10 @@ $currentSection = '';
 
     foreach ($lines as $line) {
 
-        $clean = trim($line);
+        $line = trim($line);
+
+// remove bullet symbols
+$line = preg_replace('/^[\•\●\-\*]+\s*/u', '', $line);
         if ($clean === '') continue;
 
         // remove bullets
