@@ -20,6 +20,18 @@ if ($hasWill) $keywords[] = 'will';
 
 // Word count
 $wordCount = str_word_count($requirement);
+// Check if requirement is testable/verifiable
+$testKeywords = ['display', 'calculate', 'generate', 'send', 'store', 'update', 'delete', 'validate', 'record', 'show'];
+$isTestable = false;
+
+foreach ($testKeywords as $word) {
+    if (strpos($text, $word) !== false) {
+        $isTestable = true;
+        break;
+    }
+}
+// Check if requirement is measurable
+$isMeasurable = preg_match('/\d+/', $requirement);
 ?>
 
 <!DOCTYPE html>
@@ -545,6 +557,18 @@ $wordCount = str_word_count($requirement);
             </div>
             <span class="check-label">Uses mandatory/recommended language</span>
         </div>
+        <div class="checklist-item">
+    <div class="check-icon <?php echo $isTestable ? 'success' : 'danger'; ?>">
+        <?php echo $isTestable ? '✓' : '✗'; ?>
+    </div>
+    <span class="check-label">Requirement is testable/verifiable</span>
+</div>
+<div class="checklist-item">
+    <div class="check-icon <?php echo $isMeasurable ? 'success' : 'danger'; ?>">
+        <?php echo $isMeasurable ? '✓' : '✗'; ?>
+    </div>
+    <span class="check-label">Requirement is measurable</span>
+</div>
     </div>
 
     <!-- Buttons -->
